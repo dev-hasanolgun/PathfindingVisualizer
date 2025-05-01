@@ -1,0 +1,64 @@
+# Ignore build outputs
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code
+.vscode/
+
+# Visual Studio cache and config
+.vs/
+*.dbmdl
+*.pidb
+*.psess
+*.vsp
+*.vspscc
+*.vssscc
+*.cachefile
+
+# Auto-generated files
+*.log
+*.tlog
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Others
+_ReSharper*/
+*.resharper
+*.DotSettings.user
+
+# Rider
+.idea/
+*.sln.iml
+
+# Optional: If you're using JetBrains Rider's `.idea/`, you can include project settings by removing this line.
+
+# Build results
+*.dll
+*.exe
+*.pdb
+*.cache
+*.mdb
+*.log
+*.svclog
+
+# Publish
+publish/
+
+# Crash dumps
+*.dmp
