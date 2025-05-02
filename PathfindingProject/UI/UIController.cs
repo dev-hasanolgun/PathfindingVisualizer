@@ -29,6 +29,7 @@ public class UIController : SceneBehaviour
 
     public ButtonUI ClearButton;
     public ButtonUI SearchButton;
+    public ButtonUI KeybindInfoPopupButton;
 
     public ToggleUI StepExplanationToggle;
 
@@ -43,6 +44,7 @@ public class UIController : SceneBehaviour
     public bool ShowGridCellTooltip = true;
 
     // Internal references
+    private KeybindInfoPopupForm? _popupFormInstance;
     private GridController _gridController;
     private Pathfinder _pathfinder;
 
@@ -193,6 +195,12 @@ public class UIController : SceneBehaviour
         {
             Location = new Point(10, 940)
         };
+        
+        KeybindInfoPopupButton = new ButtonUI("Show Keybinds", OpenPopup, 60, backColor: Color.RoyalBlue)
+        {
+            Location = new Point(10, 535)
+        };
+
     }
 
     /// <summary>
@@ -271,6 +279,7 @@ public class UIController : SceneBehaviour
         Form.Controls.Add(StepExplanationToggle);
         Form.Controls.Add(ClearButton);
         Form.Controls.Add(SearchButton);
+        Form.Controls.Add(KeybindInfoPopupButton);
         Form.Controls.Add(SearchSpeedSlider);
         Form.Controls.Add(StepSlider);
         Form.Controls.Add(OpenNodeCounter);
@@ -297,7 +306,25 @@ public class UIController : SceneBehaviour
         _pathfinder.ClearNodeMapExceptEndpoints();
         _pathfinder.MovePathStep(0);
     }
-
+    
+    /// <summary>
+    /// Opens the popup window if it's not already open. If it's open but not in focus, brings it to the front.
+    /// Ensures only one instance of the popup is shown at a time.
+    /// </summary>
+    private void OpenPopup(object? sender, EventArgs e)
+    {
+        if (_popupFormInstance == null || _popupFormInstance.IsDisposed)
+        {
+            _popupFormInstance = new KeybindInfoPopupForm();
+            _popupFormInstance.Show(Form);
+        }
+        else
+        {
+            _popupFormInstance.BringToFront();
+            _popupFormInstance.Focus();
+        }
+    }
+    
     /// <summary>
     /// Toggles automatic path search progression and updates the button state.
     /// </summary>

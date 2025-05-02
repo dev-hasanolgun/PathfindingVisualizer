@@ -66,6 +66,16 @@ public partial class MainForm : Form
     {
         base.OnShown(e);
         Scene.Scene.StartAll();
+
+        // Safe place to show the popup
+        if (!Settings.Settings.Default.PopupShown)
+        {
+            var popup = new KeybindInfoPopupForm();
+            popup.Show(this); // Pass this as owner to bring it in front
+
+            Settings.Settings.Default.PopupShown = true;
+            Settings.Settings.Default.Save();
+        }
     }
 
     /// <summary>

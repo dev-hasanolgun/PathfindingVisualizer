@@ -9,4 +9,15 @@
         <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Compile Update="KeybindInfoPopupForm.cs">
+        <SubType>Form</SubType>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Images\KeybindInfo.png" />
+      <EmbeddedResource Include="Images\KeybindInfo.png" />
+    </ItemGroup>
+
 </Project>
