@@ -14,7 +14,7 @@ public class GreedySearch
     /// <param name="start">Starting position on the grid.</param>
     /// <param name="goal">Target position on the grid.</param>
     /// <param name="gridSize">Dimensions of the grid.</param>
-    /// <param name="heuristic">Heuristic mode used to estimate distance.</param>
+    /// <param name="heuristic">Heuristic function used to estimate distance.</param>
     /// <returns>Returns a stack containing the nodes forming the shortest path.</returns>
     public Stack<Node> FindPath(Point start, Point goal, Point gridSize, HeuristicFunction heuristic)
     {
@@ -55,9 +55,9 @@ public class GreedySearch
                 }
                 
                 var stepCost = SampleUtils.GetStepCost(currentNode.Point, neighbor);         // Step cost between current node and neighbor node
-                var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;  // Calculate new cost to reach neighbor.
+                var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;   // Calculate new cost to reach neighbor.
 
-                // Update neighbor if first-time or cheaper path found.
+                // Update neighbor if unvisited or found a cheaper path.
                 if (neighborNode.State == NodeState.Unvisited || costToNeighbor < neighborNode.GCost)
                 {
                     neighborNode.GCost = costToNeighbor;                                                 // Set new G-Cost for neighbor node

@@ -53,9 +53,9 @@ public class UCS
                 }
                 
                 var stepCost = SampleUtils.GetStepCost(currentNode.Point, neighbor);         // Step cost between current node and neighbor node
-                var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;  // Calculate new cost to reach neighbor.
+                var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;   // Calculate new cost to reach neighbor.
 
-                // Update neighbor if first-time or cheaper path found.
+                // Update neighbor if unvisited or found a cheaper path.
                 if (neighborNode.State == NodeState.Unvisited || costToNeighbor < neighborNode.GCost)
                 {
                     neighborNode.GCost = costToNeighbor;                // Set new G-Cost for neighbor node

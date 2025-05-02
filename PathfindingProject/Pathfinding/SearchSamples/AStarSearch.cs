@@ -18,7 +18,7 @@ public class AStar
     /// <param name="start">Starting position on the grid.</param>
     /// <param name="goal">Target position on the grid.</param>
     /// <param name="gridSize">Dimensions of the grid.</param>
-    /// <param name="heuristic">Heuristic mode used to estimate distance.</param>
+    /// <param name="heuristic">Heuristic function used to estimate distance.</param>
     /// <returns>Returns a stack containing the nodes forming the shortest path.</returns>
     public Stack<Node> FindPath(Point start, Point goal, Point gridSize, HeuristicFunction heuristic)
     {
@@ -44,7 +44,7 @@ public class AStar
             _nodeMap[currentNode.Point] = currentNode;  // Update current node's state in the node map.
 
             // Iterate through each neighbor around current node.
-            foreach (var neighbor in Extensions.GetNeighbors(currentNode.Point, gridSize, NeighborMode.FourWay))
+            foreach (var neighbor in SampleUtils.GetNeighbors(currentNode.Point, gridSize, NeighborSearchType.FourWay))
             {
                 // Try to retrieve or create neighbor node.
                 if (!_nodeMap.TryGetValue(neighbor, out var neighborNode))
@@ -58,9 +58,10 @@ public class AStar
                     continue;
                 }
 
-                var stepCost = Extensions.GetStepCost(currentNode.Point, neighbor);         // Step cost between current node and neighbor node
-                var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;  // Calculate new cost to reach neighbor.
+                var stepCost = SampleUtils.GetStepCost(currentNode.Point, neighbor);         // Step cost between current node and neighbor node
+                var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;   // Calculate new cost to reach neighbor.
 
+                // Update neighbor if unvisited or found a cheaper path.
                 if (neighborNode.State == NodeState.Unvisited || costToNeighbor < neighborNode.GCost)
                 {
                     neighborNode.GCost = costToNeighbor;                                                 // Set new G-Cost for neighbor node
