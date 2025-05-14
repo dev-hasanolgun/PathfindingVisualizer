@@ -21,6 +21,7 @@ public class Pathfinder : SceneBehaviour
     public SearchMode SearchMode = SearchMode.AStarSearch;
     public HeuristicMode HeuristicMode = HeuristicMode.Manhattan;
     public NeighborMode NeighborMode = NeighborMode.FourWay;
+    public float HeuristicWeight;
     public int SearchSpeed = 5;
 
     private GridController _gridController = null!;
@@ -267,7 +268,7 @@ public class Pathfinder : SceneBehaviour
     private void Initialize(Point startPoint, Point endPoint, Dictionary<Point, Node> nodeMap, bool recordSteps = false)
     {
         UpdateSearchModes(HeuristicMode, NeighborMode);
-        _pathSearch.Initialize(_gridController.Model.GridSize, startPoint, endPoint, nodeMap, recordSteps);
+        _pathSearch.Initialize(_gridController.Model.GridSize, startPoint, endPoint, nodeMap, HeuristicWeight, recordSteps);
     }
 
     /// <summary>
@@ -344,26 +345,37 @@ public class Pathfinder : SceneBehaviour
         {
             SearchMode.BreadthFirstSearch => new GraphSearch(new QueueFrontier())
             {
+                SearchMode = SearchMode.BreadthFirstSearch,
                 HeuristicMode = HeuristicMode.Zero,
                 NeighborMode = NeighborMode.FourWay
             },
             SearchMode.DepthFirstSearch => new GraphSearch(new StackFrontier())
             {
+                SearchMode = SearchMode.DepthFirstSearch,
                 HeuristicMode = HeuristicMode.Zero,
                 NeighborMode = NeighborMode.FourWay
             },
             SearchMode.UniformCostSearch => new GraphSearch(new HeapFrontier())
             {
+                SearchMode = SearchMode.UniformCostSearch,
                 HeuristicMode = HeuristicMode.Zero,
                 NeighborMode = NeighborMode.FourWay
             },
             SearchMode.GreedyBestFirstSearch => new GraphSearch(new HeapFrontier())
             {
+                SearchMode = SearchMode.GreedyBestFirstSearch,
                 HeuristicMode = HeuristicMode,
                 NeighborMode = NeighborMode.FourWay
             },
             SearchMode.AStarSearch => new GraphSearch(new HeapFrontier())
             {
+                SearchMode = SearchMode.AStarSearch,
+                HeuristicMode = HeuristicMode,
+                NeighborMode = NeighborMode.FourWay
+            },
+            SearchMode.GeneralizedAStarSearch => new GraphSearch(new HeapFrontier())
+            {
+                SearchMode = SearchMode.GeneralizedAStarSearch,
                 HeuristicMode = HeuristicMode,
                 NeighborMode = NeighborMode.FourWay
             },

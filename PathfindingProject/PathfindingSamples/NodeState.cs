@@ -1,4 +1,4 @@
-﻿namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>Search state of the node.</summary>
 public enum NodeState

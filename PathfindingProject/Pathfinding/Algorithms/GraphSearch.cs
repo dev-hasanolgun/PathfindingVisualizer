@@ -11,9 +11,9 @@ public class GraphSearch : PathSearchBase
 {
     public GraphSearch(IFrontier frontier) : base(frontier) { }
 
-    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, bool recordSteps = false)
+    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight, bool recordSteps = false)
     {
-        base.Initialize(gridSize, start, end, nodeMap, recordSteps);
+        base.Initialize(gridSize, start, end, nodeMap, weight, recordSteps);
 
         var startNode = new Node(_startPoint)
         {
@@ -25,7 +25,8 @@ public class GraphSearch : PathSearchBase
         };
 
         _nodeMap[_startPoint] = startNode;
-        _frontier.Add(startNode, startNode.FCost + startNode.HCost);
+        var priority = GetPriority(startNode.GCost, startNode.HCost);
+        _frontier.Add(startNode, priority);
         CurrentOpenNodes++;
     }
 
@@ -131,7 +132,7 @@ public class GraphSearch : PathSearchBase
             neighborNode.HCost = HeuristicMode.Evaluate(_endPoint, neighborNode.Point);
             neighborNode.ParentPoint = currentNode.Point;
 
-            var priority = neighborNode.FCost + neighborNode.HCost;
+            var priority = GetPriority(neighborNode.GCost, neighborNode.HCost);
             _frontier.Add(neighborNode, priority);
 
             if (neighborNode.State == Node.NodeState.Unvisited)

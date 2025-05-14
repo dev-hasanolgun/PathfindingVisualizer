@@ -1,4 +1,4 @@
-﻿namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
 /// Represents different heuristic functions for estimating cost to the goal.

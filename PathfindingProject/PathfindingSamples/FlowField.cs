@@ -1,4 +1,4 @@
-﻿namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
 /// A simplified Flow Field algorithm that calculates and propagates traversal costs from a goal position across the grid.

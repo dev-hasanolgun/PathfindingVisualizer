@@ -1,6 +1,4 @@
-﻿using PathfindingProject.Core;
-
-namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
 /// Utility class providing common helper methods for grid-based pathfinding algorithms.

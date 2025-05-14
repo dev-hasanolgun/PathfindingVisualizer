@@ -35,6 +35,11 @@ public enum SearchMode
     /// A* Search: combines cost-so-far and heuristic. Widely used and optimal.
     /// </summary>
     AStarSearch,
+    
+    /// <summary>
+    /// Generalized A* Search: combines cost-so-far and heuristic. Scaling the influence of the heuristic using a weight value.
+    /// </summary>
+    GeneralizedAStarSearch,
 
     /// <summary>
     /// FlowField: propagates cost from target to all cells (used for many-agent movement).

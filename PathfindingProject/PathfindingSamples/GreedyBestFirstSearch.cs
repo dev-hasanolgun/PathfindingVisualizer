@@ -1,19 +1,15 @@
-﻿using PathfindingProject.Core;
-using PathfindingProject.Pathfinding.Enums;
-
-namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
-/// A* search algorithm efficiently finds the shortest path by considering both the cost
-/// to reach the current node and the estimated cost from the current node to the goal.
-/// It guarantees the optimal path if the heuristic used is admissible.
+/// Greedy Best-First Search prioritizes nodes closest to goal using heuristic.
+/// Fast but does not guarantee optimal path.
 /// </summary>
-public class AStar
+public class GreedySearch
 {
     private readonly Dictionary<Point, Node> _nodeMap = new();  // Tracks nodes and their current exploration states.
 
     /// <summary>
-    /// Executes the A* search algorithm to find the shortest path.
+    /// Executes the Greedy search algorithm to find the shortest path.
     /// </summary>
     /// <param name="start">Starting position on the grid.</param>
     /// <param name="goal">Target position on the grid.</param>
@@ -25,7 +21,7 @@ public class AStar
         var frontier = new PriorityQueue<Node, int>();                             // Priority queue for selecting lowest-cost node first.
         var hCost = SampleUtils.EvaluateHeuristic(heuristic, start, goal);  // Evaluate H-Cost for start node
         var startNode = new Node(start) { HCost = hCost };                         // Create start node with initial parameters.
-
+        
         frontier.Enqueue(startNode, hCost);   // Add start node to exploration queue.
         _nodeMap[start] = startNode;          // Save start node to node map.
 
@@ -53,11 +49,11 @@ public class AStar
                 }
 
                 // Skip if neighbor is blocked or already visited.
-                if (!neighborNode.Walkable || neighborNode.State == NodeState.Closed)
+                if (!neighborNode.Walkable || neighborNode.State != NodeState.Unvisited)
                 {
                     continue;
                 }
-
+                
                 var stepCost = SampleUtils.GetStepCost(currentNode.Point, neighbor);         // Step cost between current node and neighbor node
                 var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;   // Calculate new cost to reach neighbor.
 

@@ -15,6 +15,7 @@ public abstract class PathSearchBase
     public bool PathFound;
     public bool SearchComplete;
 
+    public SearchMode SearchMode;
     public HeuristicMode HeuristicMode;
     public NeighborMode NeighborMode;
 
@@ -25,6 +26,7 @@ public abstract class PathSearchBase
     protected Point _gridSize;
     protected Point _startPoint;
     protected Point _endPoint;
+    protected float _weight;
     protected bool _recordExplanations;
 
     /// <summary>
@@ -60,7 +62,7 @@ public abstract class PathSearchBase
     /// <summary>
     /// Prepares a new search instance with the given configuration.
     /// </summary>
-    public virtual void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, bool recordSteps = false)
+    public virtual void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight = 0f, bool recordSteps = false)
     {
         Reset();
 
@@ -68,6 +70,7 @@ public abstract class PathSearchBase
         _startPoint = start;
         _endPoint = end;
         _nodeMap = nodeMap;
+        _weight = weight;
 
         _recordExplanations = recordSteps;
 
@@ -154,6 +157,21 @@ public abstract class PathSearchBase
     /// Returns the current node map used during the search.
     /// </summary>
     public Dictionary<Point, Node> GetNodeMap() => _nodeMap;
+
+    protected int GetPriority(int gCost, int hCost)
+    {
+        return SearchMode switch
+        {
+            SearchMode.BreadthFirstSearch => 0,
+            SearchMode.DepthFirstSearch => 0,
+            SearchMode.UniformCostSearch => gCost,
+            SearchMode.GreedyBestFirstSearch => hCost,
+            SearchMode.AStarSearch => gCost + hCost,
+            SearchMode.GeneralizedAStarSearch => gCost + (int)(_weight * hCost),
+            SearchMode.FlowField => 0,
+            _ => throw new NotSupportedException("Search algorithm " + SearchMode + " is not supported.")
+        };
+    }
 
     /// <summary>
     /// Logs a message at the current step if explanation recording is enabled.

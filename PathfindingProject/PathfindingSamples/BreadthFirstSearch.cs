@@ -1,15 +1,15 @@
-﻿namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
-/// Depth-First Search explores deeply along each branch before backtracking.
-/// Does not guarantee the shortest path, but uses less memory.
+/// Breadth-First Search explores nodes level by level.
+/// Guarantees shortest path in terms of the number of steps (ignores cell traversal costs).
 /// </summary>
-public class DFS
+public class BFS
 {
-    private readonly Dictionary<Point, Node> _nodeMap = new();    // Stores nodes and their states for efficient tracking.
+    private readonly Dictionary<Point, Node> _nodeMap = new();  // Tracks nodes and their current exploration states.
 
     /// <summary>
-    /// Executes the DFS algorithm to find the shortest path.
+    /// Executes the BFS algorithm to find the shortest path.
     /// </summary>
     /// <param name="start">Starting position on the grid.</param>
     /// <param name="goal">Target position on the grid.</param>
@@ -17,16 +17,16 @@ public class DFS
     /// <returns>Returns a stack containing the nodes forming the shortest path.</returns>
     public Stack<Node> FindPath(Point start, Point goal, Point gridSize)
     {
-        var frontier = new Stack<Node>();   // Stack to manage the exploration order (LIFO structure for DFS).
-        var startNode = new Node(start);    // Create start node.
+        var frontier = new Queue<Node>();   // Queue to manage the order of node exploration (FIFO structure for BFS).
+        var startNode = new Node(start);    // Create start node with initial parameters.
         
-        frontier.Push(startNode);       // Add start node to exploration queue.   
+        frontier.Enqueue(startNode);    // Add start node to exploration queue.
         _nodeMap[start] = startNode;    // Save start node to node map.
 
         // Continue exploration until no more nodes are left.
         while (frontier.Count > 0)
         {
-            var currentNode = frontier.Pop();   // Pop the next node from the stack.
+            var currentNode = frontier.Dequeue();   // Dequeue the next node from the queue.
 
             // Check if goal is reached.
             if (currentNode.Point == goal)
@@ -34,8 +34,8 @@ public class DFS
                 return SampleUtils.ReconstructPath(currentNode, _nodeMap);  // Goal found, reconstruct and return the path.
             }
             
-            currentNode.State = NodeState.Closed;           // Mark current node as explored/closed.
-            _nodeMap[currentNode.Point] = currentNode;      // Update current node's state in the node map.
+            currentNode.State = NodeState.Closed;  // Mark current node as explored/closed.
+            _nodeMap[currentNode.Point] = currentNode;  // Update current node's state in the node map.
 
             // Iterate through each neighbor around current node.
             foreach (var neighbor in SampleUtils.GetNeighbors(currentNode.Point, gridSize, NeighborSearchType.FourWay))
@@ -51,11 +51,11 @@ public class DFS
                 {
                     continue;
                 }
-
+                
                 neighborNode.ParentPoint = currentNode.Point;   // Set parent for path reconstruction.
                 neighborNode.State = NodeState.Open;            // Mark neighbor node as open.
                 _nodeMap[neighbor] = neighborNode;              // Save neighbor node to node map with updated information.
-                frontier.Push(neighborNode);                    // Add neighbor node to the frontier queue to be explored next.
+                frontier.Enqueue(neighborNode);                 // Add neighbor node to the frontier queue to be explored next.
             }
         }
         

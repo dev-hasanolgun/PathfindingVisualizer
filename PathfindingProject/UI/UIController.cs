@@ -18,6 +18,7 @@ public class UIController : SceneBehaviour
 
     public SliderUI CostSlider;
     public SliderUI ObstacleSlider;
+    public SliderUI WeightSlider;
     public SliderUI StepSlider;
     public SliderUI SearchSpeedSlider;
 
@@ -179,6 +180,11 @@ public class UIController : SceneBehaviour
         {
             Location = new Point(10, 350)
         };
+        
+        WeightSlider = new SliderUI("Weight", 1, 10, 1, 100, UpdateWeight)
+        {
+            Location = new Point(10, 490)
+        };
 
         SearchSpeedSlider = new SliderUI("Search Speed", 1, 50, 5, 100, ChangeSearchSpeed)
         {
@@ -203,7 +209,7 @@ public class UIController : SceneBehaviour
         
         KeybindInfoPopupButton = new ButtonUI("Show Keybinds", OpenPopup, 60, backColor: Color.RoyalBlue)
         {
-            Location = new Point(10, 535)
+            Location = new Point(10, 610)
         };
 
     }
@@ -215,7 +221,7 @@ public class UIController : SceneBehaviour
     {
         StepExplanationToggle = new ToggleUI("Show Explanations", false, toggled: ToggleExplanationPanel)
         {
-            Location = new Point(10, 490)
+            Location = new Point(10, 565)
         };
     }
 
@@ -287,6 +293,7 @@ public class UIController : SceneBehaviour
         Form.Controls.Add(NeighborModeDropdown);
         Form.Controls.Add(GizmosDropdown);
         Form.Controls.Add(ObstacleSlider);
+        Form.Controls.Add(WeightSlider);
         Form.Controls.Add(StepExplanationToggle);
         Form.Controls.Add(ClearButton);
         Form.Controls.Add(SearchButton);
@@ -308,6 +315,16 @@ public class UIController : SceneBehaviour
     public void GenerateMap(object? sender, EventArgs e)
     {
         _gridController.GenerateMap(ObstacleSlider.Value);
+    }
+    
+    /// <summary>
+    /// Updates the heuristic weight used by the pathfinding algorithm based on the current slider value,
+    /// and refreshes the node map to reflect the new weighting in the path calculations.
+    /// </summary>
+    public void UpdateWeight(object? sender, EventArgs e)
+    {
+        _pathfinder.HeuristicWeight = WeightSlider.Value;
+        _pathfinder.UpdateNodeMap();
     }
 
     /// <summary>
@@ -391,6 +408,7 @@ public class UIController : SceneBehaviour
                 break;
 
             case SearchMode.AStarSearch:
+            case SearchMode.GeneralizedAStarSearch:
             case SearchMode.GreedyBestFirstSearch:
                 _pathfinder.HeuristicMode = HeuristicMode.Manhattan;
                 HeuristicModeDropdown.ComboBox.SelectedItem = HeuristicMode.Manhattan;

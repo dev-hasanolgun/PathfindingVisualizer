@@ -14,9 +14,9 @@ public class FlowField : PathSearchBase
     /// <summary>
     /// Initializes the flow field search from the goal point.
     /// </summary>
-    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, bool recordSteps = false)
+    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight, bool recordSteps = false)
     {
-        base.Initialize(gridSize, start, end, nodeMap, recordSteps);
+        base.Initialize(gridSize, start, end, nodeMap, weight, recordSteps);
 
         // Start the flow from the goal
         var node = new Node(_endPoint);

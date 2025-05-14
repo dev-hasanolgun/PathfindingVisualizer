@@ -1,4 +1,4 @@
-﻿namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
 /// Represents a single cell/node used in pathfinding computations.

@@ -1,4 +1,4 @@
-﻿namespace PathfindingProject.Pathfinding.SearchSamples;
+﻿namespace PathfindingProject.PathfindingSamples;
 
 /// <summary>
 /// Defines which directions are considered neighbors when evaluating adjacent cells.
