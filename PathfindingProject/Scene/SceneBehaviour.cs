@@ -1,14 +1,13 @@
 ﻿namespace PathfindingProject.Scene;
 
 /// <summary>
-/// Base class for all components that participate in the custom scene lifecycle.
+/// Base class for all components that runs in the custom scene system.
 /// Auto-registers itself to the global scene manager.
 /// </summary>
 public abstract class SceneBehaviour
 {
     /// <summary>
     /// Shortcut to the main application form.
-    /// Note: ensure Scene.Form is assigned before using this.
     /// </summary>
     protected Form Form => Scene.Form;
 

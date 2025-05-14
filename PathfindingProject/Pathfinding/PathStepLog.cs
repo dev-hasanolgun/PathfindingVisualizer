@@ -14,7 +14,7 @@ public class PathStepLog
     public string Message { get; init; }
 
     /// <summary>
-    /// The grid point this step relates to (optional).
+    /// The grid point this step relates to.
     /// </summary>
     public Point? Node { get; init; }
 

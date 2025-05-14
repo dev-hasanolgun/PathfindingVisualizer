@@ -1,8 +1,7 @@
 ﻿namespace PathfindingProject.Core;
 
 /// <summary>
-/// Provides frame-based timing information and time scaling functionality for the simulation.
-/// Call Update() once per frame to maintain accurate timing.
+/// Provides frame-based timing information and time scaling functionality.
 /// </summary>
 public static class Time
 {
@@ -19,21 +18,21 @@ public static class Time
     /// <summary>
     /// Total scaled time elapsed since the simulation started (in seconds).
     /// </summary>
-    public static float ElapsedTime => _elapsedTimeSinceStart;
+    public static float ElapsedTime => s_elapsedTimeSinceStart;
 
     /// <summary>
     /// Total number of frames that have elapsed since start.
     /// </summary>
-    public static int FrameCount => _frameCount;
+    public static int FrameCount => s_frameCount;
 
     /// <summary>
     /// Multiplier applied to DeltaTime. Set to 0 to pause time.
     /// </summary>
     public static float TimeScale { get; set; } = 1f;
 
-    private static DateTime _lastFrameTime = DateTime.Now;
-    private static float _elapsedTimeSinceStart = 0f;
-    private static int _frameCount = 0;
+    private static DateTime s_lastFrameTime = DateTime.Now;
+    private static float s_elapsedTimeSinceStart;
+    private static int s_frameCount;
 
     /// <summary>
     /// Updates time measurements. Must be called once per frame.
@@ -41,11 +40,11 @@ public static class Time
     public static void Update()
     {
         var now = DateTime.Now;
-        var rawDelta = (float)(now - _lastFrameTime).TotalSeconds;
-        _lastFrameTime = now;
+        var rawDelta = (float)(now - s_lastFrameTime).TotalSeconds;
+        s_lastFrameTime = now;
 
         DeltaTime = rawDelta * TimeScale;
-        _elapsedTimeSinceStart += DeltaTime;
-        _frameCount++;
+        s_elapsedTimeSinceStart += DeltaTime;
+        s_frameCount++;
     }
 }

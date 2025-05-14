@@ -1,14 +1,14 @@
 ﻿namespace PathfindingProject.Rendering;
 
 /// <summary>
-/// Caches Font instances to prevent redundant allocations and reduce GDI+ resource usage.
+/// Provides cached font instances for reuse to reduce GDI+ resource usage.
 /// </summary>
 public static class FontPool
 {
     private static readonly Dictionary<FontKey, Font> s_fontCache = new();
 
     /// <summary>
-    /// Returns a cached Font instance for the given family, size, and style.
+    /// Gets a font for the given family, size, and style. Caches the font for future reuse.
     /// </summary>
     public static Font Get(string family, float size, FontStyle style = FontStyle.Regular)
     {
@@ -23,12 +23,11 @@ public static class FontPool
     }
 
     /// <summary>
-    /// Disposes and clears all cached fonts. Call on shutdown or UI reset.
+    /// Disposes and clears all cached fonts.
     /// </summary>
     public static void Clear()
     {
-        foreach (var font in s_fontCache.Values)
-            font.Dispose();
+        foreach (var font in s_fontCache.Values) font.Dispose();
 
         s_fontCache.Clear();
     }

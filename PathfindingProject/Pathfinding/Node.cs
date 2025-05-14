@@ -7,7 +7,14 @@ namespace PathfindingProject.Pathfinding;
 /// </summary>
 public struct Node
 {
+    /// <summary>
+    /// Position of the node on the grid.
+    /// </summary>
     public Point Point;
+
+    /// <summary>
+    /// The parent node's position in the path (used for backtracking).
+    /// </summary>
     public Point? ParentPoint;
 
     /// <summary>Cost from start to this node (g).</summary>
@@ -25,7 +32,7 @@ public struct Node
     /// <summary>Current state of the node in the search process.</summary>
     public NodeState State;
 
-    /// <summary>Total cost (g + h).</summary>
+    /// <summary>Total cost (G + H).</summary>
     public int FCost => GCost + HCost;
 
     /// <summary>Creates a new node with default values and a specified position.</summary>

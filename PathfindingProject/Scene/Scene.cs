@@ -3,23 +3,22 @@
 namespace PathfindingProject.Scene;
 
 /// <summary>
-/// Global scene manager that handles lifecycle events for registered behaviours.
-/// Provides a Unity-style Awake/Start/Update/Draw flow.
+/// Global scene manager that handles events for registered behaviours.
 /// </summary>
 public static class Scene
 {
     /// <summary>
-    /// The application’s main form. Used for size references and layout.
+    /// The application’s main form.
     /// </summary>
     public static Form Form = null!;
 
     /// <summary>
-    /// All active scene behaviours participating in the lifecycle.
+    /// All active scene behaviours.
     /// </summary>
     public static readonly List<SceneBehaviour> Behaviours = new();
 
     /// <summary>
-    /// Calls Awake() on all registered behaviours. Intended to run once before Start().
+    /// Calls Awake() on all registered behaviours. Runs once before Start().
     /// </summary>
     public static void AwakeAll()
     {
@@ -30,7 +29,7 @@ public static class Scene
     }
 
     /// <summary>
-    /// Calls Start() on all registered behaviours. Intended to run once after Awake().
+    /// Calls Start() on all registered behaviours. Runs once after Awake().
     /// </summary>
     public static void StartAll()
     {

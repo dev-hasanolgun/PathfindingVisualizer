@@ -36,9 +36,6 @@ public class ToggleUI : Panel
     /// </summary>
     public event EventHandler? Toggled;
 
-    /// <summary>
-    /// Creates a new toggle switch UI with a label and optional default state.
-    /// </summary>
     public ToggleUI(string label, bool defaultState = false, int size = 20, EventHandler? toggled = null)
     {
         const int padding = 5;

@@ -4,7 +4,7 @@ using PathfindingProject.Pathfinding.Enums;
 namespace PathfindingProject.Pathfinding.Algorithms;
 
 /// <summary>
-/// Generates randomized obstacle maps while ensuring all non-obstacle cells are accessible from a start point.
+/// Generates randomized obstacle maps while ensuring all empty cells are accessible from a start point.
 /// </summary>
 public class FloodFill
 {
@@ -56,7 +56,7 @@ public class FloodFill
     }
 
     /// <summary>
-    /// Checks whether the remaining non-obstacle cells form a single connected region starting from the given point.
+    /// Checks whether the remaining empty cells form a single connected region starting from the given point.
     /// </summary>
     public bool IsGridConnected(HashSet<Point> obstacleList, Point startPoint, int targetCount, NeighborMode neighborMode = NeighborMode.FourWay)
     {
@@ -68,6 +68,8 @@ public class FloodFill
         while (queue.Count > 0)
         {
             var current = queue.Dequeue();
+            
+            // Allocate a fixed-size buffer on the stack for neighbor points (faster, avoids GC).
             Span<Point> neighborBuffer = stackalloc Point[8];
             var neighborCount = Extensions.GetNeighborsNonAlloc(current, _gridSize, neighborBuffer, neighborMode);
 

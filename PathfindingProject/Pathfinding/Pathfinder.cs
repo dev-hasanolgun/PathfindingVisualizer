@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
+using System.Text;
 using PathfindingProject.Core;
 using PathfindingProject.Grid;
 using PathfindingProject.Pathfinding.Algorithms;
@@ -10,8 +11,8 @@ using PathfindingProject.UI;
 namespace PathfindingProject.Pathfinding;
 
 /// <summary>
-/// Coordinates and executes grid-based pathfinding algorithms over time.
-/// Supports step-based visualization and full search execution.
+/// Executes grid based pathfinding algorithms on runtime.
+/// Supports step based visualization and full search execution.
 /// </summary>
 public class Pathfinder : SceneBehaviour
 {
@@ -31,6 +32,7 @@ public class Pathfinder : SceneBehaviour
     private float _holdInterval = 0.05f;
     private float _holdDelay = 0.25f;
     private float _holdTimer;
+    private float _computationTime;
     private int _currentStep;
     private int _totalSteps;
     private bool _isSearching;
@@ -107,6 +109,7 @@ public class Pathfinder : SceneBehaviour
         _isSearching = !_isSearching;
         return _isSearching;
     }
+    
     /// <summary>
     /// Completes the search immediately and stores the final path.
     /// </summary>
@@ -119,7 +122,7 @@ public class Pathfinder : SceneBehaviour
         }
 
         _currentStep = _pathSearch.TotalStepsTaken;
-        _uiController.UpdateTrackers(_pathSearch.CurrentOpenNodes, _pathSearch.CurrentClosedNodes, PathfindingResult.Path.Count, GetTotalPathCost());
+        _uiController.UpdateTrackers(_pathSearch.CurrentOpenNodes, _pathSearch.CurrentClosedNodes, PathfindingResult.Path.Count, GetTotalPathCost(),_computationTime);
     }
 
     /// <summary>
@@ -156,16 +159,15 @@ public class Pathfinder : SceneBehaviour
                     _uiController.UpdateSearchButton(_isSearching);
                 }
 
-                // Stop early for non-flowfield searches
-                if (SearchMode != SearchMode.FlowField)
-                    break;
+                // Stop early for non flow field searches
+                if (SearchMode != SearchMode.FlowField) break;
             }
         }
 
         UpdatePathStepLog();
 
         _currentStepsPercentage = _totalSteps != 0 ? (float)_currentStep / _totalSteps : 0f;
-        _uiController.UpdateTrackers(_pathSearch.CurrentOpenNodes, _pathSearch.CurrentClosedNodes, PathfindingResult.Path.Count, GetTotalPathCost());
+        _uiController.UpdateTrackers(_pathSearch.CurrentOpenNodes, _pathSearch.CurrentClosedNodes, PathfindingResult.Path.Count, GetTotalPathCost(),_computationTime);
         _uiController.UpdateStepSlider(_currentStep, _totalSteps);
     }
 
@@ -199,10 +201,11 @@ public class Pathfinder : SceneBehaviour
         }
 
         UpdatePathStepLog();
-        _uiController.UpdateTrackers(_pathSearch.CurrentOpenNodes, _pathSearch.CurrentClosedNodes, PathfindingResult.Path.Count, GetTotalPathCost());
+        _uiController.UpdateTrackers(_pathSearch.CurrentOpenNodes, _pathSearch.CurrentClosedNodes, PathfindingResult.Path.Count, GetTotalPathCost(),_computationTime);
         _uiController.UpdateSearchButton(_isSearching = false);
         _uiController.UpdateStepSlider(_currentStep, _totalSteps);
     }
+    
     /// <summary>
     /// Clears the entire node map except for the start and end point overrides.
     /// </summary>
@@ -229,7 +232,7 @@ public class Pathfinder : SceneBehaviour
     }
 
     /// <summary>
-    /// Applies the current UI-configured search mode options.
+    /// Applies the current UI configured search mode options.
     /// </summary>
     private void UpdateSearchModes(HeuristicMode heuristicMode, NeighborMode neighborMode)
     {
@@ -238,7 +241,7 @@ public class Pathfinder : SceneBehaviour
     }
 
     /// <summary>
-    /// Runs a full internal dry-run to calculate the max number of steps.
+    /// Runs a complete search to calculate the max number of steps.
     /// </summary>
     private void SaveTotalSteps()
     {
@@ -249,7 +252,12 @@ public class Pathfinder : SceneBehaviour
         UpdateSearchModes(HeuristicMode, NeighborMode);
         Initialize(gridModel.StartPoint, gridModel.EndPoint, tempNodeMap);
 
+        var st = new Stopwatch();
+        st.Start();
         _pathSearch.CompleteSearch();
+        st.Stop();
+        _computationTime = (float) st.Elapsed.TotalMilliseconds;
+        st.Reset();
         _totalSteps = _pathSearch.TotalStepsTaken + 1;
     }
 
@@ -263,7 +271,7 @@ public class Pathfinder : SceneBehaviour
     }
 
     /// <summary>
-    /// Clears all visual/path state, preserving configuration.
+    /// Clears all visual/path state.
     /// </summary>
     private void ResetResult()
     {
@@ -285,8 +293,7 @@ public class Pathfinder : SceneBehaviour
             for (int i = 0; i < logList.Count; i++)
             {
                 sb.Append(logList[i].Message);
-                if (i < logList.Count - 1)
-                    sb.AppendLine();
+                if (i < logList.Count - 1) sb.AppendLine();
             }
 
             _uiController.StepExplanationUI.TextContent = sb.ToString();

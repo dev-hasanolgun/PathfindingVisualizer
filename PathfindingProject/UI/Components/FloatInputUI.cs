@@ -3,9 +3,9 @@
 namespace PathfindingProject.UI.Components;
 
 /// <summary>
-/// A styled integer input box with optional min/max clamping and title label.
+/// A styled float input box with optional min/max clamping and title label.
 /// </summary>
-public class IntInputUI : Panel
+public class FloatInputUI : Panel
 {
     /// <summary>
     /// The label displaying the input title.
@@ -13,32 +13,32 @@ public class IntInputUI : Panel
     public Label TitleLabel { get; }
 
     /// <summary>
-    /// The text box used for integer input.
+    /// The text box used for float input.
     /// </summary>
     public TextBox InputBox { get; }
 
     /// <summary>Optional minimum value to enforce on input.</summary>
-    public int? Min { get; set; }
+    public float? Min { get; set; }
 
     /// <summary>Optional maximum value to enforce on input.</summary>
-    public int? Max { get; set; }
+    public float? Max { get; set; }
 
-    /// <summary>Gets or sets the current integer value, applying min/max clamping.</summary>
-    public int Value
+    /// <summary>Gets or sets the current float value, applying min/max clamping.</summary>
+    public float Value
     {
         get
         {
-            int.TryParse(InputBox.Text, out var value);
+            float.TryParse(InputBox.Text, out var value);
             return ClampValue(value);
         }
         set
         {
             var clamped = ClampValue(value);
-            InputBox.Text = clamped.ToString();
+            InputBox.Text = clamped.ToString("0.###");
         }
     }
 
-    public IntInputUI(string title, int defaultValue = 0, int? min = default, int? max = default)
+    public FloatInputUI(string title, float defaultValue = 0f, float? min = default, float? max = default)
     {
         const int padding = 10;
         var font = FontPool.Get("Segoe UI", 10f);
@@ -65,7 +65,7 @@ public class IntInputUI : Panel
 
         InputBox = new TextBox
         {
-            Text = defaultValue.ToString(),
+            Text = defaultValue.ToString("0.###"),
             Font = font,
             Size = inputSize,
             Location = new Point(padding, 30),
@@ -80,48 +80,56 @@ public class IntInputUI : Panel
 
         InputBox.KeyPress += HandleKeyPress;
 
-        // Re-apply clamping on every change
         InputBox.TextChanged += (_, _) =>
         {
-            Value = Value; // Triggers clamp and updates if needed
+            Value = Value;
         };
     }
 
     /// <summary>
-    /// Handles key press events to restrict input to valid integer characters.
+    /// Handles key press events to restrict input to valid float characters.
     /// </summary>
     private void HandleKeyPress(object? sender, KeyPressEventArgs e)
     {
-        // Allow digits and control characters (backspace, arrows)
-        if (!char.IsControl(e.KeyChar) && !char.IsDigit(e.KeyChar))
+        var c = e.KeyChar;
+        var isMinus = c == '-';
+        var isDot = c == '.';
+
+        if (!char.IsControl(c) && !char.IsDigit(c) && !isMinus && !isDot)
         {
-            // Allow minus only at beginning and not already present
-            if (e.KeyChar != '-' || InputBox.SelectionStart != 0 || InputBox.Text.Contains('-'))
+            e.Handled = true;
+        }
+
+        if (isMinus)
+        {
+            if (InputBox.SelectionStart != 0 || InputBox.Text.Contains('-'))
             {
                 e.Handled = true;
             }
         }
 
-        // Suppress Enter/Escape to avoid focus or form behavior
-        if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape)
+        if (isDot)
+        {
+            if (InputBox.Text.Contains('.') && !InputBox.SelectedText.Contains('.'))
+            {
+                e.Handled = true;
+            }
+        }
+
+        if (c == (char)Keys.Enter || c == (char)Keys.Escape)
         {
             e.Handled = true;
         }
     }
 
     /// <summary>
-    /// Clamps the given integer value within optional min and max bounds.
+    /// Clamps the given float value within optional min and max bounds.
     /// </summary>
-    private int ClampValue(int value)
+    private float ClampValue(float value)
     {
-        if (Min.HasValue && Max.HasValue)
-            return Math.Clamp(value, Min.Value, Max.Value);
-
-        if (Min.HasValue)
-            return Math.Max(value, Min.Value);
-
-        if (Max.HasValue)
-            return Math.Min(value, Max.Value);
+        if (Min.HasValue && Max.HasValue) return Math.Clamp(value, Min.Value, Max.Value);
+        if (Min.HasValue) return Math.Max(value, Min.Value);
+        if (Max.HasValue) return Math.Min(value, Max.Value);
 
         return value;
     }

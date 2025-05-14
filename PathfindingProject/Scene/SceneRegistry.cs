@@ -2,14 +2,14 @@
 
 /// <summary>
 /// Provides global lookup and registration for SceneBehaviour instances.
-/// Acts as a lightweight service locator within the scene lifecycle system.
+/// Acts as a service locator within the scene system.
 /// </summary>
 public static class SceneRegistry
 {
     private static readonly Dictionary<Type, SceneBehaviour> s_instances = new();
 
     /// <summary>
-    /// Registers a SceneBehaviour instance by its concrete type.
+    /// Registers a SceneBehaviour instance by its type.
     /// </summary>
     public static void Register<T>(T instance) where T : SceneBehaviour
     {

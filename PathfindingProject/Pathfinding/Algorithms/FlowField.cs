@@ -5,12 +5,15 @@ using PathfindingProject.Pathfinding.Frontiers;
 namespace PathfindingProject.Pathfinding.Algorithms;
 
 /// <summary>
-/// A cost-propagation pathfinding algorithm that builds a flow field from the goal back to all reachable points.
+/// A pathfinding algorithm that builds a flow field from the goal back to all reachable points.
 /// </summary>
 public class FlowField : PathSearchBase
 {
     public FlowField(IFrontier frontier) : base(frontier) { }
 
+    /// <summary>
+    /// Initializes the flow field search from the goal point.
+    /// </summary>
     public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, bool recordSteps = false)
     {
         base.Initialize(gridSize, start, end, nodeMap, recordSteps);
@@ -20,6 +23,10 @@ public class FlowField : PathSearchBase
         _frontier.Add(node);
     }
 
+    /// <summary>
+    /// Performs a single step of the flow field algorithm.
+    /// </summary>
+    /// <returns>True if a step was performed; false if search is complete or no nodes remain.</returns>
     public override bool PerformStep()
     {
         if (SearchComplete)
@@ -88,9 +95,7 @@ public class FlowField : PathSearchBase
         }
 
         // If we've successfully closed the start node, the flow field can now guide a path.
-        if (_nodeMap.TryGetValue(_startPoint, out var startNode) &&
-            startNode.State == Node.NodeState.Closed &&
-            startNode.ParentPoint != null)
+        if (_nodeMap.TryGetValue(_startPoint, out var startNode) && startNode.State == Node.NodeState.Closed && startNode.ParentPoint != null)
         {
             PathFound = true;
             LogStep("Path to start point has been established via flow field.", StepType.GoalReached, _startPoint);
@@ -100,6 +105,10 @@ public class FlowField : PathSearchBase
         return true;
     }
 
+    /// <summary>
+    /// Builds and returns the path by tracing the flow field from start to goal.
+    /// </summary>
+    /// <returns>A stack of nodes forming the path, or an empty stack if no path was found.</returns>
     public override Stack<Node> GetPath()
     {
         var path = new Stack<Node>();
@@ -119,13 +128,16 @@ public class FlowField : PathSearchBase
             if (!_nodeMap.TryGetValue(currentNode.ParentPoint.Value, out currentNode)) break;
         }
 
-        // Optional: include the end point
-        if (currentNode.Point == _endPoint)
-            path.Push(currentNode);
+        // Include the end point
+        if (currentNode.Point == _endPoint) path.Push(currentNode);
 
         return path;
     }
 
+    /// <summary>
+    /// Completes the flow field search in one go, setting PathFound if the start is reachable.
+    /// </summary>
+    /// <returns>True if the start point was reached; otherwise, false.</returns>
     public override bool CompleteSearch()
     {
         base.CompleteSearch();

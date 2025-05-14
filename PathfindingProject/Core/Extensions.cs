@@ -4,15 +4,10 @@ using PathfindingProject.Rendering;
 
 namespace PathfindingProject.Core;
 
-/// <summary>
-/// A collection of helper and extension methods for grid-based math, color manipulation, and rendering.
-/// </summary>
 public static class Extensions
 {
-    // ────────────────────────────────
-    // Grid Direction Definitions
-    // ────────────────────────────────
-    
+    #region Grid Direction Definitions
+
     private static readonly Point[] s_fourWay =
     {
         new(0, -1),
@@ -27,9 +22,9 @@ public static class Extensions
         new(-1,  1), new(0,  1), new(1,  1)
     };
 
-    // ────────────────────────────────
-    // Grid/Pathfinding Helpers
-    // ────────────────────────────────
+    #endregion
+
+    #region Grid/Pathfinding Helpers
 
     public static int GetStepCost(Point from, Point to, int straightCost = 10, int diagonalCost = 14)
     {
@@ -125,9 +120,9 @@ public static class Extensions
         return count;
     }
 
-    // ────────────────────────────────
-    // Rendering Helpers
-    // ────────────────────────────────
+    #endregion
+
+    #region Rendering Helpers
 
     public static void DrawArrowFromPosition(Graphics g, PointF position, Size size, PointF arrowEnd, Color arrowColor, float thickness = 2f)
     {
@@ -138,9 +133,9 @@ public static class Extensions
         g.DrawLine(pen, arrowStart, arrowEnd);
     }
 
-    // ────────────────────────────────
-    // Grid ↔ Screen Coordinate Conversion
-    // ────────────────────────────────
+    #endregion
+
+    #region Grid <-> Screen Coordinate Conversion
 
     public static Point GridToScreen(Point gridIndex, Point gridSize, Point cellSize, Size formSize)
     {
@@ -173,9 +168,9 @@ public static class Extensions
         return new Point(gridX, gridY);
     }
 
-    // ────────────────────────────────
-    // Math Operators (Point Extensions)
-    // ────────────────────────────────
+    #endregion
+
+    #region Math Operators (Point Extensions)
 
     public static Point Add(this Point a, Point b) => new(a.X + b.X, a.Y + b.Y);
     public static Point Sub(this Point a, Point b) => new(a.X - b.X, a.Y - b.Y);
@@ -184,9 +179,9 @@ public static class Extensions
     public static PointF Div(this Point a, float scalar) => new(a.X / scalar, a.Y / scalar);
     public static PointF ToPointF(this Point p) => new(p.X, p.Y);
 
-    // ────────────────────────────────
-    // Dictionary and Color Utilities
-    // ────────────────────────────────
+    #endregion
+
+    #region Dictionary and Color Utilities
 
     public static void MergeWith<TKey, TValue>(this Dictionary<TKey, TValue> source, Dictionary<TKey, TValue> other, bool overwrite = true)
     {
@@ -212,4 +207,6 @@ public static class Extensions
     }
 
     public static Color SetAlpha(this Color color, int alpha) => Color.FromArgb(alpha, color.R, color.G, color.B);
+
+    #endregion
 }

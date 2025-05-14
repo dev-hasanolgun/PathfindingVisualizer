@@ -29,8 +29,7 @@ public class GridModel
     /// </summary>
     public void SetCellObstacle(Point point)
     {
-        if (point == StartPoint || point == EndPoint)
-            return;
+        if (point == StartPoint || point == EndPoint) return;
 
         var node = new Node(point) { Walkable = false };
         GridOverrides.Remove(point);
@@ -42,8 +41,7 @@ public class GridModel
     /// </summary>
     public void SetCellCost(Point point, int cellCost)
     {
-        if (point == StartPoint || point == EndPoint)
-            return;
+        if (point == StartPoint || point == EndPoint) return;
 
         var node = new Node(point) { CellCost = cellCost };
         GridOverrides.Remove(point);

@@ -7,6 +7,9 @@ namespace PathfindingProject.UI.Components;
 /// </summary>
 public class TextUI : Panel
 {
+    /// <summary>
+    /// The internal label used to render text.
+    /// </summary>
     public Label Label { get; private set; }
 
     private int _padding;
@@ -50,9 +53,6 @@ public class TextUI : Panel
         }
     }
 
-    /// <summary>
-    /// Initializes a new text display UI element.
-    /// </summary>
     public TextUI(string text = "", float textSize = 10f, bool multiline = false, bool scrollable = false, int width = 0, int height = 0, int padding = 10)
     {
         var font = FontPool.Get("Segoe UI", textSize, FontStyle.Bold);

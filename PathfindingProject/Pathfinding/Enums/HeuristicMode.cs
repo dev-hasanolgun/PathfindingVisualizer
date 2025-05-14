@@ -1,7 +1,7 @@
 ﻿namespace PathfindingProject.Pathfinding.Enums;
 
 /// <summary>
-/// Represents different heuristic strategies for estimating cost to the goal.
+/// Represents different heuristic functions for estimating cost to the goal.
 /// </summary>
 public enum HeuristicMode
 {

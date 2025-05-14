@@ -5,7 +5,7 @@ using PathfindingProject.Pathfinding.Frontiers;
 namespace PathfindingProject.Pathfinding.Algorithms;
 
 /// <summary>
-/// A flexible graph search implementation that adapts to Dijkstra, Greedy, or BFS based on the heuristic mode and frontier.
+/// A flexible graph search implementation that adapts to both informed and uninformed searches with dynamic frontier.
 /// </summary>
 public class GraphSearch : PathSearchBase
 {
@@ -94,13 +94,13 @@ public class GraphSearch : PathSearchBase
             }
             else
             {
-                var oldG = neighborNode.GCost;
+                var oldGCost = neighborNode.GCost;
                 ProcessNeighbor(currentNode, neighborNode);
-                var newG = neighborNode.GCost;
+                var newGCost = neighborNode.GCost;
 
-                if (oldG != newG || neighborNode.State == Node.NodeState.Open)
+                if (oldGCost != newGCost || neighborNode.State == Node.NodeState.Open)
                 {
-                    LogStep($"Updated or added neighbor {neighborPoint} — G: {oldG} → {newG}, F: {neighborNode.FCost}", StepType.AddedToOpen, neighborPoint);
+                    LogStep($"Updated or added neighbor {neighborPoint} — G: {oldGCost} → {newGCost}, F: {neighborNode.FCost}", StepType.AddedToOpen, neighborPoint);
                 }
             }
 
@@ -118,7 +118,7 @@ public class GraphSearch : PathSearchBase
     }
 
     /// <summary>
-    /// Handles cost-based neighbor processing (used for Dijkstra, A*, etc.).
+    /// Handles neighbor processing using heuristic function (used for informed searches).
     /// </summary>
     private void ProcessNeighbor(Node currentNode, Node neighborNode)
     {
@@ -147,7 +147,7 @@ public class GraphSearch : PathSearchBase
     }
 
     /// <summary>
-    /// Handles unweighted neighbor processing (used for BFS-style searches).
+    /// Handles neighbor processing without heuristic function (used for uninformed searches).
     /// </summary>
     private void ProcessNeighborNoCost(Node currentNode, Node neighborNode)
     {

@@ -10,8 +10,19 @@ public class SliderUI : Panel
     /// <summary>Triggered when the slider value changes.</summary>
     public event EventHandler? OnScroll;
 
+    /// <summary>
+    /// The label displaying the slider's title.
+    /// </summary>
     public Label TitleLabel { get; }
+
+    /// <summary>
+    /// The slider track control.
+    /// </summary>
     public TrackBar Slider { get; }
+
+    /// <summary>
+    /// The label showing the current slider value.
+    /// </summary>
     public Label ValueLabel { get; }
 
     protected override bool ShowFocusCues => false;
@@ -28,16 +39,7 @@ public class SliderUI : Panel
             UpdateValueLabel();
         }
     }
-
-    /// <summary>
-    /// Creates a new labeled slider UI control.
-    /// </summary>
-    /// <param name="title">The label text to display above the slider.</param>
-    /// <param name="min">Minimum value.</param>
-    /// <param name="max">Maximum value.</param>
-    /// <param name="initialValue">Starting slider value.</param>
-    /// <param name="sliderWidth">Width of the slider track.</param>
-    /// <param name="onScroll">Optional event callback for scroll.</param>
+    
     public SliderUI(string title, int min, int max, int initialValue, int sliderWidth = 150, EventHandler? onScroll = null)
     {
         const int padding = 5;
@@ -99,7 +101,7 @@ public class SliderUI : Panel
     }
 
     /// <summary>
-    /// Updates the label to reflect the current slider value.
+    /// Updates the displayed value label to match the slider's current value.
     /// </summary>
     private void UpdateValueLabel()
     {

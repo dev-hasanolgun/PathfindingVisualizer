@@ -12,6 +12,9 @@ public static class InputManager
 
     private static int s_scrollDelta;
 
+    /// <summary>
+    /// Gets the current mouse position in screen coordinates.
+    /// </summary>
     public static Point MousePosition { get; private set; }
 
     /// <summary>
@@ -19,9 +22,7 @@ public static class InputManager
     /// </summary>
     public static int ScrollDelta => s_scrollDelta;
 
-    // ─────────────────────────────────────────────────────────────
-    // Input Queries — Keyboard
-    // ─────────────────────────────────────────────────────────────
+    #region Input Queries — Keyboard
 
     /// <summary>
     /// Returns true if a key is held down (Pressed or Held). Can be exclusive.
@@ -62,10 +63,13 @@ public static class InputManager
         return isReleased && onlyThis && noMouse;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Input Queries — Mouse
-    // ─────────────────────────────────────────────────────────────
+    #endregion
 
+    #region Input Queries — Mouse
+
+    /// <summary>
+    /// Returns true if the specified mouse button is currently held down (Pressed or Held). Can be exclusive.
+    /// </summary>
     public static bool GetMouseButton(MouseButtons button, bool exclusive = false)
     {
         var isHeld = s_mouseStates.GetValueOrDefault(button) is InputState.Pressed or InputState.Held;
@@ -76,6 +80,9 @@ public static class InputManager
         return isHeld && onlyThis && noKeys;
     }
 
+    /// <summary>
+    /// Returns true only on the frame the specified mouse button was pressed. Can be exclusive.
+    /// </summary>
     public static bool GetMouseButtonDown(MouseButtons button, bool exclusive = false)
     {
         var isPressed = s_mouseStates.GetValueOrDefault(button) == InputState.Pressed;
@@ -86,6 +93,9 @@ public static class InputManager
         return isPressed && onlyThis && noKeys;
     }
 
+    /// <summary>
+    /// Returns true only on the frame the specified mouse button was released. Can be exclusive.
+    /// </summary>
     public static bool GetMouseButtonUp(MouseButtons button, bool exclusive = false)
     {
         var isReleased = s_mouseStates.GetValueOrDefault(button) == InputState.Released;
@@ -96,21 +106,30 @@ public static class InputManager
         return isReleased && onlyThis && noKeys;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Input Event Handlers (called externally by WinForms)
-    // ─────────────────────────────────────────────────────────────
+    #endregion
 
+    #region Input Event Handlers
+
+    /// <summary>
+    /// Processes a keyboard key down event.
+    /// </summary>
     public static void HandleKeyDown(KeyEventArgs e)
     {
         if (!s_keyStates.TryGetValue(e.KeyCode, out var state) || state == InputState.Up)
             s_keyStates[e.KeyCode] = InputState.Pressed;
     }
 
+    /// <summary>
+    /// Processes a keyboard key up event.
+    /// </summary>
     public static void HandleKeyUp(KeyEventArgs e)
     {
         s_keyStates[e.KeyCode] = InputState.Released;
     }
 
+    /// <summary>
+    /// Processes a mouse button down event and requests focus clear.
+    /// </summary>
     public static void HandleMouseDown(MouseEventArgs e)
     {
         if (!s_mouseStates.TryGetValue(e.Button, out var state) || state == InputState.Up)
@@ -119,27 +138,36 @@ public static class InputManager
         RequestFocusClear?.Invoke();
     }
 
+    /// <summary>
+    /// Processes a mouse button up event.
+    /// </summary>
     public static void HandleMouseUp(MouseEventArgs e)
     {
         s_mouseStates[e.Button] = InputState.Released;
     }
 
+    /// <summary>
+    /// Updates the mouse position.
+    /// </summary>
     public static void HandleMouseMove(MouseEventArgs e)
     {
         MousePosition = e.Location;
     }
 
+    /// <summary>
+    /// Accumulates mouse scroll delta for the current frame.
+    /// </summary>
     public static void HandleMouseScroll(MouseEventArgs e)
     {
         s_scrollDelta += e.Delta;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Frame Lifecycle
-    // ─────────────────────────────────────────────────────────────
+    #endregion
+
+    #region Disposal
 
     /// <summary>
-    /// Transitions inputs between frames: Pressed→Held, Released→Up.
+    /// Transitions inputs between frames: Pressed->Held, Released->Up.
     /// Call once per frame at the end of input processing.
     /// </summary>
     public static void ResetFrameState()
@@ -166,4 +194,24 @@ public static class InputManager
             };
         }
     }
+
+    /// <summary>
+    /// Immediately sets all key and mouse inputs to the Up state and resets scroll delta.
+    /// </summary>
+    public static void ForceReleaseAllInputs()
+    {
+        foreach (var key in s_keyStates.Keys.ToList())
+        {
+            s_keyStates[key] = InputState.Up;
+        }
+
+        foreach (var button in s_mouseStates.Keys.ToList())
+        {
+            s_mouseStates[button] = InputState.Up;
+        }
+
+        s_scrollDelta = 0;
+    }
+
+    #endregion
 }

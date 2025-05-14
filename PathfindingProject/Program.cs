@@ -11,9 +11,6 @@ internal static class Program
     [STAThread]
     static void Main()
     {
-        // Optional for .NET Core/6+ projects:
-        // ApplicationConfiguration.Initialize();
-
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
 

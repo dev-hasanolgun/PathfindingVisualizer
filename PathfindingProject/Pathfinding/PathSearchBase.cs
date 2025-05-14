@@ -36,6 +36,11 @@ public abstract class PathSearchBase
     {
         _frontier = frontier;
     }
+    
+    /// <summary>
+    /// Executes one iteration (step) of the pathfinding process.
+    /// </summary>
+    public abstract bool PerformStep();
 
     /// <summary>
     /// Resets the search state and clears all previous results.
@@ -83,11 +88,6 @@ public abstract class PathSearchBase
     }
 
     /// <summary>
-    /// Executes one iteration (step) of the pathfinding process.
-    /// </summary>
-    public abstract bool PerformStep();
-
-    /// <summary>
     /// Completes the search by executing steps until the frontier is empty or the path is found.
     /// </summary>
     public virtual bool CompleteSearch()
@@ -99,8 +99,7 @@ public abstract class PathSearchBase
             PerformStep();
         }
 
-        if (_recordExplanations)
-            LogStep("Search completed", StepType.Info);
+        if (_recordExplanations) LogStep("Search completed");
 
         return PathFound;
     }
@@ -112,25 +111,21 @@ public abstract class PathSearchBase
     {
         var path = new Stack<Node>();
 
-        if (!PathFound || !_nodeMap.TryGetValue(_endPoint, out var currentNode))
-            return path;
+        if (!PathFound || !_nodeMap.TryGetValue(_endPoint, out var currentNode)) return path;
 
         var visited = new HashSet<Point>();
 
         while (currentNode.Point != _startPoint)
         {
             // Prevent infinite loops in case of broken parent chains
-            if (visited.Contains(currentNode.Point))
-                break;
+            if (visited.Contains(currentNode.Point)) break;
 
             visited.Add(currentNode.Point);
             path.Push(currentNode);
 
-            if (currentNode.ParentPoint == null)
-                break;
+            if (currentNode.ParentPoint == null) break;
 
-            if (!_nodeMap.TryGetValue(currentNode.ParentPoint.Value, out currentNode))
-                break;
+            if (!_nodeMap.TryGetValue(currentNode.ParentPoint.Value, out currentNode)) break;
         }
 
         return path;
@@ -143,15 +138,13 @@ public abstract class PathSearchBase
     {
         path = new Stack<Node>();
 
-        if (!_nodeMap.TryGetValue(_endPoint, out var currentNode))
-            return false;
+        if (!_nodeMap.TryGetValue(_endPoint, out var currentNode)) return false;
 
         while (currentNode.ParentPoint != null && currentNode.Point != _startPoint)
         {
             path.Push(currentNode);
 
-            if (!_nodeMap.TryGetValue(currentNode.ParentPoint.Value, out currentNode))
-                return false;
+            if (!_nodeMap.TryGetValue(currentNode.ParentPoint.Value, out currentNode)) return false;
         }
 
         return currentNode.Point == _startPoint;

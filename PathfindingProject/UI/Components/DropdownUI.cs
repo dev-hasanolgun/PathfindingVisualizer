@@ -7,12 +7,29 @@ namespace PathfindingProject.UI.Components;
 /// </summary>
 public class EnumDropdownUI<TEnum> : Panel where TEnum : Enum
 {
+    /// <summary>
+    /// Occurs when the selected enum value changes.
+    /// </summary>
     public event EventHandler? SelectionChanged;
 
+    /// <summary>
+    /// The ComboBox control displaying enum options.
+    /// </summary>
     public ComboBox ComboBox { get; private set; }
+
+    /// <summary>
+    /// The label displayed above the dropdown.
+    /// </summary>
     public Label Label { get; private set; }
+
+    /// <summary>
+    /// The text content of the label.
+    /// </summary>
     public string LabelText { get; private set; }
 
+    /// <summary>
+    /// The currently selected enum value.
+    /// </summary>
     public TEnum SelectedValue => (TEnum)ComboBox.SelectedItem!;
 
     public EnumDropdownUI(string label, TEnum defaultValue, int width = 0, int height = 60, EventHandler? selectionChanged = null)
@@ -66,7 +83,7 @@ public class EnumDropdownUI<TEnum> : Panel where TEnum : Enum
     }
 
     /// <summary>
-    /// Populates the ComboBox with all values of the enum and sets the default selection.
+    /// Adds all enum values to the ComboBox and sets the default selection.
     /// </summary>
     private void PopulateComboBoxWithEnumValues(TEnum defaultValue)
     {

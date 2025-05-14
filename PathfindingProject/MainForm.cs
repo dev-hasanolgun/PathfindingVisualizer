@@ -51,7 +51,7 @@ public partial class MainForm : Form
     }
 
     /// <summary>
-    /// Main game loop tick. Calls scene update and triggers repaint.
+    /// Main loop tick. Calls scene update and triggers repaint.
     /// </summary>
     private void GameLoop(object? sender, EventArgs e)
     {
@@ -71,7 +71,7 @@ public partial class MainForm : Form
         if (!Settings.Settings.Default.PopupShown)
         {
             var popup = new KeybindInfoPopupForm();
-            popup.Show(this); // Pass this as owner to bring it in front
+            popup.Show(this);
 
             Settings.Settings.Default.PopupShown = true;
             Settings.Settings.Default.Save();
@@ -94,8 +94,7 @@ public partial class MainForm : Form
     {
         foreach (Control ctrl in Controls)
         {
-            if (ctrl.Visible && ctrl.Bounds.Contains(mouse))
-                return true;
+            if (ctrl.Visible && ctrl.Bounds.Contains(mouse)) return true;
         }
         return false;
     }
@@ -112,5 +111,7 @@ public partial class MainForm : Form
 
         KeyDown += (_, e) => InputManager.HandleKeyDown(e);
         KeyUp += (_, e) => InputManager.HandleKeyUp(e);
+        
+        Deactivate += (_, _) => InputManager.ForceReleaseAllInputs();
     }
 }

@@ -5,7 +5,7 @@
 /// </summary>
 public enum SearchMode
 {
-    // ─── Tree-based (uninformed) ──────────────────────────────
+    #region Uninformed
 
     /// <summary>
     /// Breadth-First Search: explores all neighbors evenly. Unweighted.
@@ -17,12 +17,14 @@ public enum SearchMode
     /// </summary>
     DepthFirstSearch,
 
-    // ─── Graph-based (cost-aware) ─────────────────────────────
-
     /// <summary>
     /// Uniform Cost Search: expands lowest-cost path without using a heuristic.
     /// </summary>
     UniformCostSearch,
+
+    #endregion
+
+    #region Informed
 
     /// <summary>
     /// Greedy Best-First Search: uses heuristic only (no cost so far).
@@ -34,10 +36,10 @@ public enum SearchMode
     /// </summary>
     AStarSearch,
 
-    // ─── Grid field-based ─────────────────────────────────────
-
     /// <summary>
     /// FlowField: propagates cost from target to all cells (used for many-agent movement).
     /// </summary>
     FlowField
+
+    #endregion
 }

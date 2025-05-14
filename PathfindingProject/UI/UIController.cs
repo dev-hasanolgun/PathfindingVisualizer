@@ -14,7 +14,8 @@ namespace PathfindingProject.UI;
 /// </summary>
 public class UIController : SceneBehaviour
 {
-    // UI Components — Core Controls
+    #region UI Components — Core Controls
+
     public SliderUI CostSlider;
     public SliderUI ObstacleSlider;
     public SliderUI StepSlider;
@@ -26,6 +27,7 @@ public class UIController : SceneBehaviour
     public IntInputUI CloseNodeCounter;
     public IntInputUI PathLengthCounter;
     public IntInputUI PathCostCounter;
+    public FloatInputUI ComputationTimeCounter;
 
     public ButtonUI ClearButton;
     public ButtonUI SearchButton;
@@ -43,18 +45,23 @@ public class UIController : SceneBehaviour
 
     public bool ShowGridCellTooltip = true;
 
-    // Internal references
+    #endregion
+
+    #region Internal references
+
     private KeybindInfoPopupForm? _popupFormInstance;
     private GridController _gridController;
     private Pathfinder _pathfinder;
 
-    // Tooltip control
+    #endregion
+
+    #region Tooltip control
+
     private float _hoverDelay = 0.5f;
     private float _hoverTimer;
 
-    /// <summary>
-    /// Called before Start. Resolves dependencies and registers tooltip callbacks.
-    /// </summary>
+    #endregion
+
     public override void Awake()
     {
         _pathfinder = SceneRegistry.Resolve<Pathfinder>();
@@ -64,9 +71,6 @@ public class UIController : SceneBehaviour
         _gridController.OnCellHoverOut += HideCellTooltip;
     }
 
-    /// <summary>
-    /// Called once after Awake. Initializes all UI components and adds them to the main form.
-    /// </summary>
     public override void Start()
     {
         InitializeGridControls();
@@ -78,18 +82,26 @@ public class UIController : SceneBehaviour
         RegisterAllControls();
     }
     
+    public override void Update()
+    {
+        if (InputManager.GetKeyDown(Keys.Space)) TogglePathSearch(null, null);
+    }
+
     /// <summary>
-    /// Updates the open and closed node counters on the UI.
+    /// Updates the search counters on the UI.
     /// </summary>
-    /// <param name="openNodes">The current number of open (frontier) nodes.</param>
+    /// <param name="openNodes">The current number of open nodes.</param>
     /// <param name="closedNodes">The number of nodes already explored.</param>
     /// <param name="pathLength">The length of the found path. (0 if not found).</param>
-    public void UpdateTrackers(int openNodes, int closedNodes, int pathLength, int pathCost)
+    /// <param name="pathCost">The total cost of the found path.</param>
+    /// <param name="computationTime">The computation time of the search algorithm.</param>
+    public void UpdateTrackers(int openNodes, int closedNodes, int pathLength, int pathCost, float computationTime)
     {
         OpenNodeCounter.Value = openNodes;
         CloseNodeCounter.Value = closedNodes;
         PathLengthCounter.Value = pathLength;
         PathCostCounter.Value = pathCost;
+        ComputationTimeCounter.Value = computationTime;
     }
 
     /// <summary>
@@ -109,20 +121,13 @@ public class UIController : SceneBehaviour
     /// <summary>
     /// Updates the appearance of the search toggle button based on whether the search is running.
     /// </summary>
-    /// <param name="toggle">True if searching (shows \"Pause\"), false if idle (shows \"Play\").</param>
+    /// <param name="toggle">True if searching, false if idle.</param>
     public void UpdateSearchButton(bool toggle)
     {
         SearchButton.Button.Text = toggle ? "Pause" : "Play";
         SearchButton.Button.BackColor = toggle ? Color.DarkRed : Color.DarkGreen;
     }
-
-    /// <summary>
-    /// Monitors for global hotkeys (e.g., spacebar to start/stop search).
-    /// </summary>
-    public override void Update()
-    {
-        if (InputManager.GetKeyDown(Keys.Space)) TogglePathSearch(null, null);
-    }
+    
     /// <summary>
     /// Initializes UI elements related to grid editing and terrain layout.
     /// </summary>
@@ -151,7 +156,7 @@ public class UIController : SceneBehaviour
     }
 
     /// <summary>
-    /// Initializes dropdowns and sliders for algorithm-specific configuration.
+    /// Initializes dropdowns and sliders for algorithm configuration.
     /// </summary>
     private void InitializeSearchControls()
     {
@@ -215,7 +220,7 @@ public class UIController : SceneBehaviour
     }
 
     /// <summary>
-    /// Prepares pathfinding diagnostics: step slider, node counters, tooltips, and explanation UI.
+    /// Initializes pathfinding diagnostics.
     /// </summary>
     private void InitializeTrackingDisplays()
     {
@@ -245,6 +250,12 @@ public class UIController : SceneBehaviour
         PathCostCounter = new IntInputUI("Path Cost")
         {
             Location = new Point(1750, 220),
+            Enabled = false
+        };
+        
+        ComputationTimeCounter = new FloatInputUI("Computation Time")
+        {
+            Location = new Point(1750, 290),
             Enabled = false
         };
 
@@ -286,6 +297,7 @@ public class UIController : SceneBehaviour
         Form.Controls.Add(CloseNodeCounter);
         Form.Controls.Add(PathLengthCounter);
         Form.Controls.Add(PathCostCounter);
+        Form.Controls.Add(ComputationTimeCounter);
         Form.Controls.Add(GridCellTooltip);
         Form.Controls.Add(StepExplanationUI);
     }
@@ -343,15 +355,16 @@ public class UIController : SceneBehaviour
     }
 
     /// <summary>
-    /// Advances the visualized search step based on the step slider's percentage value.
+    /// Advances the search step based on the step slider's percentage value.
     /// </summary>
     private void MovePathStep(object? sender, EventArgs e)
     {
         _pathfinder.MovePathStep(StepSlider.Value);
     }
+    
     /// <summary>
     /// Handles changes to the selected search mode. 
-    /// Adjusts heuristic/gizmo availability and resets the node map.
+    /// Adjusts heuristic/gizmo availability and updates the node map.
     /// </summary>
     private void ChangeSearchMode(object? sender, EventArgs e)
     {
@@ -434,7 +447,7 @@ public class UIController : SceneBehaviour
     }
     
     /// <summary>
-    /// Shows a cell tooltip with node data after a short hover delay.
+    /// Shows a cell tooltip with node data on hover.
     /// </summary>
     private void ShowCellTooltip(Node node)
     {

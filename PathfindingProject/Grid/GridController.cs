@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using PathfindingProject.Core;
+﻿using PathfindingProject.Core;
 using PathfindingProject.Pathfinding;
 using PathfindingProject.Pathfinding.Algorithms;
 using PathfindingProject.Pathfinding.Enums;
@@ -14,9 +13,8 @@ namespace PathfindingProject.Grid;
 /// </summary>
 public class GridController : SceneBehaviour
 {
-    // ───────────────────────────────────────────────────────
-    // Public Fields & Events
-    // ───────────────────────────────────────────────────────
+
+    #region Public Fields & Events
 
     public readonly GridModel Model = new();
 
@@ -24,17 +22,17 @@ public class GridController : SceneBehaviour
     public event Action? OnCellHoverOut;
     public event Action? OnGridUpdate;
 
-    // ───────────────────────────────────────────────────────
-    // Dependencies
-    // ───────────────────────────────────────────────────────
+    #endregion
+
+    #region Dependencies
 
     private UIController _uiController = null!;
     private Pathfinder _pathfinder = null!;
     private FloodFill _floodFill = null!;
 
-    // ───────────────────────────────────────────────────────
-    // Grid & Viewport State
-    // ───────────────────────────────────────────────────────
+    #endregion
+
+    #region Grid & Viewport State
 
     private Point _mousePos;
     private Point _lastMousePos;
@@ -53,9 +51,9 @@ public class GridController : SceneBehaviour
     private bool _isHovering;
     private bool _isDraggingView;
 
-    // ───────────────────────────────────────────────────────
-    // Properties
-    // ───────────────────────────────────────────────────────
+    #endregion
+
+    #region Properties
 
     /// <summary>
     /// Gets or sets the clamped cell size (min 10x10).
@@ -71,9 +69,9 @@ public class GridController : SceneBehaviour
         }
     }
 
-    // ───────────────────────────────────────────────────────
-    // Unity-Like Lifecycle Methods
-    // ───────────────────────────────────────────────────────
+    #endregion
+
+    #region SceneBehaviour Methods
 
     public override void Awake()
     {
@@ -91,9 +89,8 @@ public class GridController : SceneBehaviour
 
     public override void Update()
     {
-        // ─────────────────────────────────────────────
-        // 1. Grid Size Sync from UI
-        // ─────────────────────────────────────────────
+        #region Grid Size Sync from UI
+
         if (Model.GridSize.X != _uiController.GridSizeXInputUI.Value ||
             Model.GridSize.Y != _uiController.GridSizeYInputUI.Value)
         {
@@ -105,9 +102,9 @@ public class GridController : SceneBehaviour
             GenerateMap(_uiController.ObstacleSlider.Value); // Re-generate walls
         }
 
-        // ─────────────────────────────────────────────
-        // 2. Hovering & Mouse Position Detection
-        // ─────────────────────────────────────────────
+        #endregion
+
+        #region Hovering & Mouse Position Detection
 
         _mousePos = InputManager.MousePosition;
         var adjustedMouse = _mousePos - _panOffset;
@@ -129,9 +126,9 @@ public class GridController : SceneBehaviour
         // Snap to valid grid cell for drawing
         _hoveredCell = Model.SnapToNearestValidCell(gridPos);
 
-        // ─────────────────────────────────────────────
-        // 3. Drag-to-Pan with Ctrl + Left Mouse
-        // ─────────────────────────────────────────────
+        #endregion
+
+        #region Drag-to-Pan with Ctrl + Left Mouse
 
         if (InputManager.GetKeyDown(Keys.K))
         {
@@ -165,9 +162,9 @@ public class GridController : SceneBehaviour
             _isDraggingView = false;
         }
 
-        // ─────────────────────────────────────────────
-        // 4. Zoom In/Out with Scroll Wheel
-        // ─────────────────────────────────────────────
+        #endregion
+
+        #region Zoom In/Out with Scroll Wheel
 
         if (InputManager.ScrollDelta > 0)
         {
@@ -180,16 +177,26 @@ public class GridController : SceneBehaviour
             UpdateCellSize();
         }
 
-        // ─────────────────────────────────────────────
-        // 5. Interaction: Left/Right Click + Shift Key
-        // ─────────────────────────────────────────────
+        #endregion
+
+        #region Placement: Left/Right Click + Shift Key
 
         // Left click: Toggle start point or clear override
-        if (IsMouseOverGrid() && InputManager.GetMouseButton(MouseButtons.Left, true))
+        if (IsMouseOverGrid() && InputManager.GetMouseButton(MouseButtons.Left, true) && _hoveredCell != Model.StartPoint)
         {
-            Debug.WriteLine("test");
             if (Model.GridOverrides.ContainsKey(_hoveredCell)) Model.GridOverrides.Remove(_hoveredCell);
             else Model.StartPoint = _hoveredCell;
+
+            OnGridUpdate?.Invoke();
+        }
+        
+        // Shift + Left click: Toggle end point
+        if (IsMouseOverGrid() && InputManager.GetKey(Keys.ShiftKey) && InputManager.GetMouseButton(MouseButtons.Left) && _hoveredCell != Model.EndPoint)
+        {
+            if (Model.GridOverrides.ContainsKey(_hoveredCell))
+                Model.GridOverrides.Remove(_hoveredCell);
+            else
+                Model.EndPoint = _hoveredCell;
 
             OnGridUpdate?.Invoke();
         }
@@ -208,23 +215,14 @@ public class GridController : SceneBehaviour
             OnGridUpdate?.Invoke();
         }
 
-        // Shift + Left click: Toggle end point
-        if (IsMouseOverGrid() && InputManager.GetKey(Keys.ShiftKey) && InputManager.GetMouseButton(MouseButtons.Left))
-        {
-            if (Model.GridOverrides.ContainsKey(_hoveredCell))
-                Model.GridOverrides.Remove(_hoveredCell);
-            else
-                Model.EndPoint = _hoveredCell;
-
-            OnGridUpdate?.Invoke();
-        }
+        #endregion
     }
+
+    #endregion
 
     public override void Draw(Graphics g)
     {
-        // ─────────────────────────────────────────────
-        // 1. Draw grid visuals and core data overlays
-        // ─────────────────────────────────────────────
+        #region Draw grid visuals and core data overlays
 
         DrawGridFrame(g); // Outer border
         DrawBaseGrid(g); // Base cell tiles
@@ -234,9 +232,9 @@ public class GridController : SceneBehaviour
         DrawStartEnd(g); // Start/end points
         if (IsMouseOverGrid()) DrawGridHighlighter(g); // Mouse hover cell highlight
 
-        // ─────────────────────────────────────────────
-        // 2. Debug Gizmos (selected from dropdown)
-        // ─────────────────────────────────────────────
+        #endregion
+
+        #region Debug Gizmos (selected from dropdown)
 
         switch (_uiController.GizmosDropdown.SelectedValue)
         {
@@ -254,6 +252,8 @@ public class GridController : SceneBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        #endregion
     }
 
     private void DrawGridFrame(Graphics g)
@@ -282,9 +282,9 @@ public class GridController : SceneBehaviour
         g.DrawRectangle(pen, rect);
     }
 
+    // Draws default background for each cell
     private void DrawBaseGrid(Graphics g)
     {
-        // Draws default background for each cell
         for (int y = 0; y < Model.GridSize.Y; y++)
         {
             for (int x = 0; x < Model.GridSize.X; x++)
@@ -297,13 +297,12 @@ public class GridController : SceneBehaviour
         }
     }
 
+    // Draws walls (black) and weighted cells (scaled brown)
     private void DrawGridOverrides(Graphics g)
     {
-        // Draws walls (black) and weighted cells (scaled brown)
         foreach (var (point, node) in Model.GridOverrides)
         {
             var screenPos = Extensions.GridToScreen(point, Model.GridSize, CellSize, Form.ClientSize) + _panOffset;
-
             var normalizedCost = Math.Clamp(node.CellCost / 10f, 0f, 1f);
             var scale = 0.2f + (1f - normalizedCost) * 0.8f;
 
@@ -312,20 +311,31 @@ public class GridController : SceneBehaviour
                 : BrushPool.Get(Color.SaddleBrown.ScaleColor(scale));
 
             g.FillRectangle(brush, screenPos.X, screenPos.Y, CellSize.X - 2, CellSize.Y - 2);
+            
+            if (!node.Walkable) continue;
+            var w = CellSize.X;
+            var h = CellSize.Y;
+            var costFont = FontPool.Get("Segoe UI", MathF.Min(w, h) * 0.36f, FontStyle.Bold);
+            var costText = node.CellCost.ToString();
+            var costSize = TextRenderer.MeasureText(costText, costFont);
+
+            g.DrawString(costText, costFont, BrushPool.Get(Color.White),
+                screenPos.X + (w / 2f) - (costSize.Width / 2f),
+                screenPos.Y + (h / 2f) - (costSize.Height / 2f));
         }
     }
 
+    // Highlights cell currently under mouse
     private void DrawGridHighlighter(Graphics g)
     {
-        // Highlights cell currently under mouse
         var screenPos = Extensions.GridToScreen(_hoveredCell, Model.GridSize, CellSize, Form.ClientSize) + _panOffset;
         var brush = BrushPool.Get(Color.FromArgb(128, Color.DarkGray));
         g.FillRectangle(brush, screenPos.X, screenPos.Y, CellSize.X - 2, CellSize.Y - 2);
     }
 
+    // Draws start and end points
     private void DrawStartEnd(Graphics g)
     {
-        // Draws start and end points in CornflowerBlue
         var startScreen = Extensions.GridToScreen(Model.StartPoint, Model.GridSize, CellSize, Form.ClientSize) +
                           _panOffset;
         var endScreen = Extensions.GridToScreen(Model.EndPoint, Model.GridSize, CellSize, Form.ClientSize) + _panOffset;
@@ -335,9 +345,9 @@ public class GridController : SceneBehaviour
         g.FillRectangle(brush, endScreen.X, endScreen.Y, CellSize.X - 2, CellSize.Y - 2);
     }
 
+    // Draws the current found path if one exists
     private void DrawPath(Graphics g, Stack<Node>? path)
     {
-        // Draws the current computed path (if one exists)
         if (path == null) return;
 
         foreach (var node in path)
@@ -348,9 +358,9 @@ public class GridController : SceneBehaviour
         }
     }
 
+    // Colors the grid based on pathfinding state (open/closed)
     private void DrawNodeMap(Graphics g, Dictionary<Point, Node>? nodeMap)
     {
-        // Colors the grid based on pathfinding state (open/closed)
         if (nodeMap == null || nodeMap.Count == 0) return;
 
         var minCost = _pathfinder.SearchMode != SearchMode.FlowField ? nodeMap[Model.StartPoint].FCost : 0;
@@ -393,10 +403,21 @@ public class GridController : SceneBehaviour
                     screenPos.X + CellSize.X - size.Width - 2,
                     screenPos.Y + CellSize.Y - size.Height - 2,
                     size.Width, size.Height);
+                
+                var w = CellSize.X;
+                var h = CellSize.Y;
+                var costFont = FontPool.Get("Segoe UI", MathF.Min(w, h) * 0.12f, FontStyle.Bold);
+                var costText = node.CellCost.ToString();
+                var costSize = TextRenderer.MeasureText(costText, costFont);
+
+                g.DrawString(costText, costFont, BrushPool.Get(Color.White),
+                    screenPos.X + CellSize.X - size.Width - 2,
+                    screenPos.Y + CellSize.Y - size.Height - 2);
             }
         }
     }
 
+    // Draws the cost values based on pathfinding state
     private void DrawNodeCosts(Graphics g, Dictionary<Point, Node>? nodeMap)
     {
         if (nodeMap == null || nodeMap.Count == 0) return;
@@ -430,6 +451,7 @@ public class GridController : SceneBehaviour
         }
     }
 
+    // Draws arrows based on node parent direction
     private void DrawArrows(Graphics g, Dictionary<Point, Node>? nodeMap)
     {
         if (nodeMap == null || nodeMap.Count == 0) return;
@@ -481,6 +503,7 @@ public class GridController : SceneBehaviour
         }
     }
 
+    // Draws the grid index based on node position
     private void DrawNodePositions(Graphics g, Dictionary<Point, Node>? nodeMap)
     {
         if (nodeMap == null || nodeMap.Count == 0) return;
@@ -504,8 +527,9 @@ public class GridController : SceneBehaviour
         }
     }
 
+    
     /// <summary>
-    /// Generates a random obstacle layout based on flood fill, while preserving connectivity.
+    /// Generates a random obstacle map based on flood fill, while preserving connectivity of empty cells.
     /// </summary>
     public void GenerateMap(int obstaclePercent)
     {
@@ -526,10 +550,8 @@ public class GridController : SceneBehaviour
         _pathfinder.UpdateNodeMap();
     }
 
-    /// <summary>
-    /// Recalculates cell size based on form resolution and zoom scale.
-    /// Maintains 16:9 aspect ratio for consistent visuals.
-    /// </summary>
+    
+    // Recalculates cell size based on form resolution and zoom scale. Maintains 16:9 aspect ratio.
     private void UpdateCellSize()
     {
         const float targetAspect = 16f / 9f;
@@ -547,9 +569,7 @@ public class GridController : SceneBehaviour
         );
     }
 
-    /// <summary>
-    /// Prevents panning beyond the edge of the grid visualization.
-    /// </summary>
+    // Prevents panning beyond the edge of the grid visualization.
     private void ClampPanOffset()
     {
         var halfGridSizePx = new Size(
@@ -561,9 +581,8 @@ public class GridController : SceneBehaviour
         _panOffset.Height = Math.Clamp(_panOffset.Height, -halfGridSizePx.Height, halfGridSizePx.Height);
     }
 
-    /// <summary>
-    /// Ensures start/end points and override entries remain within grid bounds.
-    /// </summary>
+    
+    // Clamps start/end points and override entries to remain within grid bounds.
     private void FixNodeMap()
     {
         Model.StartPoint = ClampToGrid(Model.StartPoint, Model.GridSize);
@@ -582,9 +601,7 @@ public class GridController : SceneBehaviour
         }
     }
 
-    /// <summary>
-    /// Clamps a point to the nearest valid grid cell.
-    /// </summary>
+    // Clamps a point to the nearest valid grid cell.
     private Point ClampToGrid(Point point, Point gridSize)
     {
         return new Point(
@@ -593,10 +610,7 @@ public class GridController : SceneBehaviour
         );
     }
     
-    /// <summary>
-    /// Determines if the current mouse position is over a valid grid cell.
-    /// Takes zoom, pan offset, and window size into account.
-    /// </summary>
+    // Determines if the current mouse position is over a valid grid cell.
     private bool IsMouseOverGrid()
     {
         var mouse = InputManager.MousePosition;

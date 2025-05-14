@@ -1,12 +1,12 @@
 ﻿namespace PathfindingProject.Pathfinding;
 
 /// <summary>
-/// Stores the results of a pathfinding run, including node expansion state and the resulting path.
+/// Stores the results of a pathfinding run, including node map and the resulting path.
 /// </summary>
 public class PathfindingResult
 {
     /// <summary>
-    /// All visited and expanded nodes during the search, keyed by their grid position.
+    /// All visited and expanded nodes during the search.
     /// </summary>
     public Dictionary<Point, Node> NodeMap { get; } = new();
 
