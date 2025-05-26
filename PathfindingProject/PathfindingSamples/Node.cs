@@ -19,6 +19,9 @@ public struct Node
 
     /// <summary>Extra movement cost for this cell (terrain weight).</summary>
     public int CellCost;
+    
+    /// <summary> Depth of the node from the start node.</summary>
+    public int DepthLimit;
 
     /// <summary>True if the node is walkable.</summary>
     public bool Walkable;

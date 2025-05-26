@@ -1,4 +1,5 @@
-﻿using PathfindingProject.Pathfinding.Enums;
+﻿using System.Diagnostics;
+using PathfindingProject.Pathfinding.Enums;
 using PathfindingProject.Pathfinding.Frontiers;
 
 namespace PathfindingProject.Pathfinding;
@@ -27,6 +28,7 @@ public abstract class PathSearchBase
     protected Point _startPoint;
     protected Point _endPoint;
     protected float _weight;
+    protected int _depthLimit;
     protected bool _recordExplanations;
 
     /// <summary>
@@ -62,7 +64,7 @@ public abstract class PathSearchBase
     /// <summary>
     /// Prepares a new search instance with the given configuration.
     /// </summary>
-    public virtual void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight = 0f, bool recordSteps = false)
+    public virtual void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight = 0f, int depthLimit = 0, bool recordSteps = false)
     {
         Reset();
 
@@ -71,6 +73,7 @@ public abstract class PathSearchBase
         _endPoint = end;
         _nodeMap = nodeMap;
         _weight = weight;
+        _depthLimit = depthLimit;
 
         _recordExplanations = recordSteps;
 

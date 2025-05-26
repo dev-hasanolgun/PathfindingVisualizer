@@ -19,6 +19,7 @@ public class UIController : SceneBehaviour
     public SliderUI CostSlider;
     public SliderUI ObstacleSlider;
     public SliderUI WeightSlider;
+    public SliderUI DepthLimitSlider;
     public SliderUI StepSlider;
     public SliderUI SearchSpeedSlider;
 
@@ -185,8 +186,13 @@ public class UIController : SceneBehaviour
         {
             Location = new Point(10, 490)
         };
+        
+        DepthLimitSlider = new SliderUI("Depth Limit", 0, 100, 0, 100, UpdateDepthLimit)
+        {
+            Location = new Point(10, 565)
+        };
 
-        SearchSpeedSlider = new SliderUI("Search Speed", 1, 50, 5, 100, ChangeSearchSpeed)
+        SearchSpeedSlider = new SliderUI("Search Speed", 1, 100, 50, 100, ChangeSearchSpeed)
         {
             Location = new Point(95, 900)
         };
@@ -209,7 +215,7 @@ public class UIController : SceneBehaviour
         
         KeybindInfoPopupButton = new ButtonUI("Show Keybinds", OpenPopup, 60, backColor: Color.RoyalBlue)
         {
-            Location = new Point(10, 610)
+            Location = new Point(10, 685)
         };
 
     }
@@ -221,7 +227,7 @@ public class UIController : SceneBehaviour
     {
         StepExplanationToggle = new ToggleUI("Show Explanations", false, toggled: ToggleExplanationPanel)
         {
-            Location = new Point(10, 565)
+            Location = new Point(10, 640)
         };
     }
 
@@ -294,6 +300,7 @@ public class UIController : SceneBehaviour
         Form.Controls.Add(GizmosDropdown);
         Form.Controls.Add(ObstacleSlider);
         Form.Controls.Add(WeightSlider);
+        Form.Controls.Add(DepthLimitSlider);
         Form.Controls.Add(StepExplanationToggle);
         Form.Controls.Add(ClearButton);
         Form.Controls.Add(SearchButton);
@@ -324,6 +331,15 @@ public class UIController : SceneBehaviour
     public void UpdateWeight(object? sender, EventArgs e)
     {
         _pathfinder.HeuristicWeight = WeightSlider.Value;
+        _pathfinder.UpdateNodeMap();
+    }
+    
+    /// <summary>
+    /// Updates the pathfinder's depth limit based on the current slider value and refreshes the node map.
+    /// </summary>
+    public void UpdateDepthLimit(object? sender, EventArgs e)
+    {
+        _pathfinder.DepthLimit = DepthLimitSlider.Value;
         _pathfinder.UpdateNodeMap();
     }
 

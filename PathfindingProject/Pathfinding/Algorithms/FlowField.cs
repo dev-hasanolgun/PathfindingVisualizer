@@ -14,9 +14,9 @@ public class FlowField : PathSearchBase
     /// <summary>
     /// Initializes the flow field search from the goal point.
     /// </summary>
-    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight, bool recordSteps = false)
+    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight = 0, int depthLimit = 0, bool recordSteps = false)
     {
-        base.Initialize(gridSize, start, end, nodeMap, weight, recordSteps);
+        base.Initialize(gridSize, start, end, nodeMap, weight, depthLimit, recordSteps);
 
         // Start the flow from the goal
         var node = new Node(_endPoint);
@@ -43,6 +43,7 @@ public class FlowField : PathSearchBase
         }
 
         var currentNode = _frontier.GetNext();
+        var currentDepth = currentNode.Depth;
 
         if (_nodeMap.TryGetValue(currentNode.Point, out var knownNode) && knownNode.State == Node.NodeState.Closed)
         {
@@ -64,9 +65,12 @@ public class FlowField : PathSearchBase
         {
             var neighborPoint = neighbors[i];
 
-            if (!_nodeMap.TryGetValue(neighborPoint, out var neighborNode))
-                neighborNode = new Node(neighborPoint);
+            if (!_nodeMap.TryGetValue(neighborPoint, out var neighborNode)) neighborNode = new Node(neighborPoint);
 
+            var neighborDepth = currentDepth + 1;
+            
+            if (neighborNode.State == Node.NodeState.Unvisited && _depthLimit > 0 && neighborDepth > _depthLimit) continue;
+            
             if (!neighborNode.Walkable)
             {
                 LogStep($"Skipped neighbor {neighborPoint} — not walkable.", StepType.Skipped, neighborPoint);
@@ -87,6 +91,7 @@ public class FlowField : PathSearchBase
                 neighborNode.GCost = totalCost; // Used as FlowField cost value to adapt existing Node struct instead of creating separate field
                 neighborNode.ParentPoint = currentNode.Point;
                 neighborNode.State = Node.NodeState.Open;
+                neighborNode.Depth = neighborDepth;
                 _nodeMap[neighborPoint] = neighborNode;
                 _frontier.Add(neighborNode);
                 CurrentOpenNodes++;

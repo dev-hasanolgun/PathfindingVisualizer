@@ -21,7 +21,8 @@ public class Pathfinder : SceneBehaviour
     public SearchMode SearchMode = SearchMode.AStarSearch;
     public HeuristicMode HeuristicMode = HeuristicMode.Manhattan;
     public NeighborMode NeighborMode = NeighborMode.FourWay;
-    public float HeuristicWeight;
+    public float HeuristicWeight = 1f;
+    public int DepthLimit;
     public int SearchSpeed = 5;
 
     private GridController _gridController = null!;
@@ -45,7 +46,8 @@ public class Pathfinder : SceneBehaviour
         _uiController = SceneRegistry.Resolve<UIController>();
 
         _gridController.OnGridUpdate += UpdateNodeMap;
-        _pathSearch = new GraphSearch(new HeapFrontier());
+        // UpdateSearchModes(HeuristicMode, NeighborMode);
+        SetPathSearch();
     }
 
     public override void Start()
@@ -268,7 +270,7 @@ public class Pathfinder : SceneBehaviour
     private void Initialize(Point startPoint, Point endPoint, Dictionary<Point, Node> nodeMap, bool recordSteps = false)
     {
         UpdateSearchModes(HeuristicMode, NeighborMode);
-        _pathSearch.Initialize(_gridController.Model.GridSize, startPoint, endPoint, nodeMap, HeuristicWeight, recordSteps);
+        _pathSearch.Initialize(_gridController.Model.GridSize, startPoint, endPoint, nodeMap, HeuristicWeight, DepthLimit, recordSteps);
     }
 
     /// <summary>

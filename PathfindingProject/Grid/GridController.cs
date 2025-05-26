@@ -230,6 +230,7 @@ public class GridController : SceneBehaviour
         DrawNodeMap(g, _pathfinder.PathfindingResult.NodeMap); // Open/closed states
         DrawPath(g, _pathfinder.PathfindingResult.Path); // Highlighted path
         DrawStartEnd(g); // Start/end points
+        DrawRingOutline(g, Model.StartPoint, _pathfinder.DepthLimit); // Base cell tiles
         if (IsMouseOverGrid()) DrawGridHighlighter(g); // Mouse hover cell highlight
 
         #endregion
@@ -294,6 +295,26 @@ public class GridController : SceneBehaviour
                 var brush = BrushPool.Get(Color.LightGray);
                 g.FillRectangle(brush, topLeft.X, topLeft.Y, CellSize.X - 2, CellSize.Y - 2);
             }
+        }
+    }
+    
+    private void DrawRingOutline(Graphics g, Point center, int radius)
+    {
+        if (radius == 0) return;
+        
+        var pen = PenPool.Get(Color.Yellow, 4);  // Customize color/thickness if needed
+
+        var edgeLines = _pathfinder.NeighborMode == NeighborMode.EightWay
+            ? Extensions.GetDiagonalRingScreenEdges(center, radius, Model.GridSize, CellSize, Form.ClientSize)
+            : Extensions.GetGeometricRingScreenEdges(center, radius, Model.GridSize, CellSize, Form.ClientSize);
+
+        foreach (var (start, end) in edgeLines)
+        {
+            // Apply zoom and pan to screen coordinates
+            var adjustedStart = start + _panOffset;
+            var adjustedEnd = end + _panOffset;
+
+            g.DrawLine(pen, adjustedStart, adjustedEnd);
         }
     }
 

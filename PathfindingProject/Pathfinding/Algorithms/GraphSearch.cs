@@ -1,4 +1,5 @@
-﻿using PathfindingProject.Core;
+﻿using System.Diagnostics;
+using PathfindingProject.Core;
 using PathfindingProject.Pathfinding.Enums;
 using PathfindingProject.Pathfinding.Frontiers;
 
@@ -11,9 +12,9 @@ public class GraphSearch : PathSearchBase
 {
     public GraphSearch(IFrontier frontier) : base(frontier) { }
 
-    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight, bool recordSteps = false)
+    public override void Initialize(Point gridSize, Point start, Point end, Dictionary<Point, Node> nodeMap, float weight = 0, int depthLimit = 0, bool recordSteps = false)
     {
-        base.Initialize(gridSize, start, end, nodeMap, weight, recordSteps);
+        base.Initialize(gridSize, start, end, nodeMap, weight, depthLimit, recordSteps);
 
         var startNode = new Node(_startPoint)
         {
@@ -46,6 +47,7 @@ public class GraphSearch : PathSearchBase
         }
 
         var currentNode = _frontier.GetNext();
+        var currentDepth = currentNode.Depth;
 
         if (_nodeMap.TryGetValue(currentNode.Point, out var knownNode) && knownNode.State == Node.NodeState.Closed)
         {
@@ -73,9 +75,12 @@ public class GraphSearch : PathSearchBase
 
         foreach (var neighborPoint in neighbors)
         {
-            if (!_nodeMap.TryGetValue(neighborPoint, out var neighborNode))
-                neighborNode = new Node(neighborPoint);
+            if (!_nodeMap.TryGetValue(neighborPoint, out var neighborNode)) neighborNode = new Node(neighborPoint);
 
+            var neighborDepth = currentDepth + 1;
+            // Debug.WriteLine(neighborDepth + " " + _depthLimit + " " + (_depthLimit > 0) + " " + (neighborDepth > _depthLimit));
+            if (neighborNode.State == Node.NodeState.Unvisited && _depthLimit > 0 && neighborDepth > _depthLimit) continue;
+            
             if (!neighborNode.Walkable)
             {
                 LogStep($"Skipped neighbor {neighborPoint} — not walkable.", StepType.Skipped, neighborPoint);
@@ -91,12 +96,12 @@ public class GraphSearch : PathSearchBase
             if (HeuristicMode == HeuristicMode.None)
             {
                 LogStep($"Processing neighbor {neighborPoint} with no heuristic (BFS-style).", StepType.Info, neighborPoint);
-                ProcessNeighborNoCost(currentNode, neighborNode);
+                ProcessNeighborNoCost(currentNode, neighborNode, neighborDepth);
             }
             else
             {
                 var oldGCost = neighborNode.GCost;
-                ProcessNeighbor(currentNode, neighborNode);
+                ProcessNeighbor(currentNode, neighborNode, neighborDepth);
                 var newGCost = neighborNode.GCost;
 
                 if (oldGCost != newGCost || neighborNode.State == Node.NodeState.Open)
@@ -121,7 +126,7 @@ public class GraphSearch : PathSearchBase
     /// <summary>
     /// Handles neighbor processing using heuristic function (used for informed searches).
     /// </summary>
-    private void ProcessNeighbor(Node currentNode, Node neighborNode)
+    private void ProcessNeighbor(Node currentNode, Node neighborNode, int depth)
     {
         var stepCost = Extensions.GetStepCost(currentNode.Point, neighborNode.Point);
         var costToNeighbor = currentNode.GCost + stepCost + neighborNode.CellCost;
@@ -130,6 +135,7 @@ public class GraphSearch : PathSearchBase
         {
             neighborNode.GCost = costToNeighbor;
             neighborNode.HCost = HeuristicMode.Evaluate(_endPoint, neighborNode.Point);
+            neighborNode.Depth = depth;
             neighborNode.ParentPoint = currentNode.Point;
 
             var priority = GetPriority(neighborNode.GCost, neighborNode.HCost);
@@ -150,8 +156,9 @@ public class GraphSearch : PathSearchBase
     /// <summary>
     /// Handles neighbor processing without heuristic function (used for uninformed searches).
     /// </summary>
-    private void ProcessNeighborNoCost(Node currentNode, Node neighborNode)
+    private void ProcessNeighborNoCost(Node currentNode, Node neighborNode, int depth)
     {
+        neighborNode.Depth = depth;
         if (neighborNode.State == Node.NodeState.Unvisited)
         {
             neighborNode.ParentPoint = currentNode.Point;

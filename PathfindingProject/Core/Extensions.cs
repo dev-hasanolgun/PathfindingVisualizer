@@ -132,6 +132,138 @@ public static class Extensions
         var arrowStart = new PointF(position.X + size.Width / 2f, position.Y + size.Height / 2f);
         g.DrawLine(pen, arrowStart, arrowEnd);
     }
+    
+    public static List<(Point Start, Point End)> GetDiagonalRingScreenEdges(
+        Point center, int radius, Point gridSize, Point cellSize, Size formSize)
+    {
+        var edgeLines = new List<(Point Start, Point End)>();
+
+        var minX = Math.Max(center.X - radius, 0);
+        var maxX = Math.Min(center.X + radius, gridSize.X - 1);
+
+        var minY = Math.Max(center.Y - radius, 0);
+        var maxY = Math.Min(center.Y + radius, gridSize.Y - 1);
+
+        var bottomLeft = GridToScreen(new Point(minX, minY - 1), gridSize, cellSize, formSize);
+        var bottomRight = GridToScreen(new Point(maxX + 1, minY - 1), gridSize, cellSize, formSize);
+        var topLeft = GridToScreen(new Point(minX, maxY), gridSize, cellSize, formSize);
+        var topRight = GridToScreen(new Point(maxX + 1, maxY), gridSize, cellSize, formSize);
+
+        edgeLines.Add((topLeft, topRight));         // Top edge
+        edgeLines.Add((topLeft, bottomLeft));       // Left edge
+        edgeLines.Add((bottomLeft, bottomRight));   // Bottom edge
+        edgeLines.Add((bottomRight, topRight));     // Right edge
+
+        return edgeLines;
+    }
+
+    public static List<(Point Start, Point End)> GetGeometricRingScreenEdges(
+    Point center, int radius, Point gridSize, Point cellSize, Size formSize)
+    {
+        var edgeLines = new List<(Point Start, Point End)>();
+        var ringCells = GetRingCells(center, radius, gridSize);
+
+        foreach (var cell in ringCells)
+        {
+            edgeLines.AddRange(GetCellEdges(cell, center, radius, gridSize, cellSize, formSize));
+        }
+
+        return edgeLines;
+    }
+
+    private static IEnumerable<Point> GetRingCells(Point center, int radius, Point gridSize)
+    {
+        var ringCells = new HashSet<Point>();
+
+        for (int dx = -radius; dx <= radius; dx++)
+        {
+            int dy = radius - Math.Abs(dx);
+
+            var candidates = new[]
+            {
+                new Point(center.X + dx, center.Y + dy),
+                new Point(center.X + dx, center.Y - dy)
+            };
+
+            foreach (var candidate in candidates)
+            {
+                var clamped = ClampToGrid(candidate, gridSize);
+                ringCells.Add(clamped);
+            }
+        }
+
+        return ringCells;
+    }
+
+    private static Point ClampToGrid(Point p, Point gridSize)
+    {
+        int x = Math.Max(0, Math.Min(p.X, gridSize.X - 1));
+        int y = Math.Max(0, Math.Min(p.Y, gridSize.Y - 1));
+        return new Point(x, y);
+    }
+
+    private static void TryAddRingCellOrNeighbor(Point candidate, Point gridSize, HashSet<Point> ringCells)
+    {
+        if (IsInBounds(candidate, gridSize))
+        {
+            ringCells.Add(candidate);
+            return;
+        }
+
+        foreach (var neighbor in GetFourNeighbors(candidate))
+        {
+            if (IsInBounds(neighbor, gridSize))
+                ringCells.Add(neighbor);
+        }
+    }
+
+    private static IEnumerable<Point> GetFourNeighbors(Point cell)
+    {
+        yield return new Point(cell.X, cell.Y + 1); // Top
+        yield return new Point(cell.X, cell.Y - 1); // Bottom
+        yield return new Point(cell.X - 1, cell.Y); // Left
+        yield return new Point(cell.X + 1, cell.Y); // Right
+    }
+
+    private static IEnumerable<(Point Start, Point End)> GetCellEdges(
+        Point cell, Point center, int radius, Point gridSize, Point cellSize, Size formSize)
+    {
+        var screenPos = GridToScreen(cell, gridSize, cellSize, formSize);
+        var cellRect = new Rectangle(screenPos.X, screenPos.Y, cellSize.X, cellSize.Y);
+
+        var directions = new[]
+        {
+            (Neighbor: new Point(cell.X, cell.Y + 1), // Top
+                Edge: (Start: new Point(cellRect.Left, cellRect.Top),
+                       End:   new Point(cellRect.Right, cellRect.Top))),
+
+            (Neighbor: new Point(cell.X, cell.Y - 1), // Bottom
+                Edge: (Start: new Point(cellRect.Left, cellRect.Bottom),
+                       End:   new Point(cellRect.Right, cellRect.Bottom))),
+
+            (Neighbor: new Point(cell.X - 1, cell.Y), // Left
+                Edge: (Start: new Point(cellRect.Left, cellRect.Top),
+                       End:   new Point(cellRect.Left, cellRect.Bottom))),
+
+            (Neighbor: new Point(cell.X + 1, cell.Y), // Right
+                Edge: (Start: new Point(cellRect.Right, cellRect.Top),
+                       End:   new Point(cellRect.Right, cellRect.Bottom)))
+        };
+
+        return directions
+            .Where(d => ShouldDrawEdge(d.Neighbor, center, radius, gridSize))
+            .Select(d => d.Edge);
+    }
+
+    private static bool ShouldDrawEdge(Point neighbor, Point center, int radius, Point gridSize)
+    {
+        return !IsInBounds(neighbor, gridSize) || GetManhattanDistance(neighbor, center) > radius;
+    }
+
+    private static int GetManhattanDistance(Point a, Point b)
+    {
+        return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y);
+    }
 
     #endregion
 
