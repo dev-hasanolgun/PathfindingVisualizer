@@ -1,11 +1,12 @@
 ﻿using PathfindingProject.Rendering;
+using PathfindingProject.UI.Scaling;
 
 namespace PathfindingProject.UI.Components;
 
 /// <summary>
 /// A generic dropdown UI for selecting a value from an enum type.
 /// </summary>
-public class EnumDropdownUI<TEnum> : Panel where TEnum : Enum
+public class EnumDropdownUI<TEnum> : ScalableControl where TEnum : Enum
 {
     /// <summary>
     /// Occurs when the selected enum value changes.
@@ -37,15 +38,15 @@ public class EnumDropdownUI<TEnum> : Panel where TEnum : Enum
         const int padding = 10;
         const int labelToComboSpacing = 2;
 
-        var font = FontPool.Get("Segoe UI", 10f);
+        var font = FontPool.Get("Segoe UI", S(10f));
 
         // Calculate width dynamically based on label text
-        var titleWidth = TextRenderer.MeasureText(label, font).Width + padding * 2;
-        var defaultWidth = width + padding * 2;
-        var usableWidth = width > 0 ? Math.Max(defaultWidth, titleWidth + padding * 2) : titleWidth + padding * 2;
+        var titleWidth = TextRenderer.MeasureText(label, font).Width + S(padding) * 2;
+        var defaultWidth = S(width) + S(padding) * 2;
+        var usableWidth = width > 0 ? Math.Max(defaultWidth, titleWidth + S(padding) * 2) : titleWidth + S(padding) * 2;
 
         LabelText = label;
-        Size = new Size(usableWidth, height);
+        Size = new Size(usableWidth, S(height));
         BackColor = Color.FromArgb(24, 24, 24);
 
         // Create label
@@ -55,7 +56,7 @@ public class EnumDropdownUI<TEnum> : Panel where TEnum : Enum
             Font = font,
             ForeColor = Color.Gainsboro,
             BackColor = Color.Transparent,
-            Location = new Point(padding, 4),
+            Location = P(padding, 4),
             AutoSize = true
         };
 
@@ -64,8 +65,8 @@ public class EnumDropdownUI<TEnum> : Panel where TEnum : Enum
         {
             Font = font,
             DropDownStyle = ComboBoxStyle.DropDownList,
-            Location = new Point(padding, Label.Bottom + labelToComboSpacing),
-            Size = new Size(usableWidth - padding * 2, 20),
+            Location = new Point(S(padding), Label.Bottom + S(labelToComboSpacing)),
+            Size = new Size(usableWidth - S(padding) * 2, S(20)),
             BackColor = Color.FromArgb(40, 40, 40),
             ForeColor = Color.White,
             FlatStyle = FlatStyle.Flat
